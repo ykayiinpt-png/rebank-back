@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext as _t
 from django import forms
 
 from apps.core.models.base_user import BaseUser
@@ -17,7 +18,7 @@ class UserRegisterForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['password1'].help_text = None
-        self.fields['password2'].help_text = "Entrez le même mot de passe que précédemment, à des fins de vérification."
+        self.fields['password2'].help_text = _t("Entrez le même mot de passe que précédemment, à des fins de vérification.")
         
     def validate_unique(self):
         exclude = self._get_validation_exclusions()
@@ -28,8 +29,10 @@ class UserRegisterValidationForm(forms.Form):
     email = forms.EmailField(required=True)
     token = forms.CharField(required=True)
 
-class UserLoginForm():
-    pass
+class UserLoginForm(forms.Form):
+    email = forms.EmailField(required=True)
+    password = forms.CharField(required=True, widget=forms.PasswordInput)
+    
 
-class UserLoginOtpForm():
-    pass
+class UserLoginOtpForm(forms.Form):
+    otp = forms.CharField(max_length=6, min_length=6, required=True)

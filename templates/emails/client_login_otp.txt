@@ -1,0 +1,7 @@
+OTP
+
+Veuillez trouver l'OTP pour la connexion à votre compte:
+
+{{ otp }}
+
+Merci

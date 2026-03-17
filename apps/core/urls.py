@@ -7,5 +7,8 @@ urlpatterns = [
     path('auth/register', views.register, name="client-auth-register"),
     path('auth/register/check', views.register_to_validate, name="client-auth-register_to_validate"),
     path('auth/register/validate', views.register_validate, name="client-auth-register_validate"),
-    path('auth/register/check/err', views.register_to_validate_error, name='client-auth-register_to_validate_err')
+    path('auth/register/check/err', views.register_to_validate_error, name='client-auth-register_to_validate_err'),
+    
+    path('auth/login', views.login, name="client-auth-login"),
+    path('auth/login/otp', views.login_otp, name='client-auth-login-otp'),
 ]

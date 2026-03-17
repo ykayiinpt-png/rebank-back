@@ -149,6 +149,12 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "apps.core.backends.authentication.EmailBackend"
+]
+
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
@@ -236,6 +242,13 @@ DEFAULT_FROM_EMAIL = "no-reply@rebank.com"
 
 # Hashing
 HMAC_SECRET = "abcd"
+
+# OTP
+OTP_LENGTH = 6
+OTP_EXP_DURATION_MINUTES = 6
+
+# Session
+SESSION_EXPIRE_MINUTES=30
 
 # Urls
 URL_REGISTATION_VALIDATION="http://127.0.0.1:8000/auth/register/validate?token={}&email={}"

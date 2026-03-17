@@ -1,17 +1,22 @@
-from django.utils import timezone
+import logging
 from datetime import timedelta
 
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from django.contrib import messages
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login as app_login
 from django.utils.translation import gettext as _t
+from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from apps.core.helpers.mail import send_template_email
-from apps.core.services.user_account import generate_registration_token, validate_registration_token
+from apps.core.helpers.time import timestamp_has_expired
+from apps.core.services.user_account import generate_registration_token, send_login_otp, validate_login_otp_signature, validate_registration_token
 
-from .forms import UserRegisterForm, UserRegisterValidationForm
+from .forms import UserLoginForm, UserLoginOtpForm, UserRegisterForm, UserRegisterValidationForm
+
+
+logger = logging.getLogger(__name__)
 
 def home(request):
     return render(request, 'client/home.html', {})
@@ -107,8 +112,8 @@ def register_validate(request: HttpRequest):
             else:
                 messages.error(request, _t("Votre lien est invalide"), extra_tags="danger")
                 return redirect('client-auth-register_to_validate_err')
-                
-            
+        else:
+            messages.error(request, _t("Votre lien est invalide"), extra_tags="danger")
         
     return redirect("client-home")
  
@@ -120,6 +125,94 @@ def register_to_validate_error(request: HttpRequest):
 # [END] Registration
 
 # [START] Login
+@require_http_methods(['GET', 'POST'])
+def login(request: HttpRequest):
+    form = None
+    if request.method == 'POST':
+        form = UserLoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+
+            # Authenticate user
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                # Generate otp and send by email
+                id_token, otp_exp = send_login_otp(email, True)
+                request.session['otp'] = { 'id_token': id_token, 'exp': otp_exp, 'email': email }
+                
+                # Redirect user to the otp page to enter otp
+                return redirect('client-auth-login-otp')
+            else:
+                # Invalid credentials
+                messages.error(request, _t("Vos identifiants sont incorrects"), extra_tags='danger')
+    else:        
+        form = UserLoginForm()
+    
+    return render(
+        request,
+        'client/auth/login.html',
+        {
+            'form': form
+        }
+    )
+
+@require_http_methods(['GET', 'POST'])
+def login_otp(request: HttpRequest):
+    form = None
+    
+    if request.method == "POST":
+        form = UserLoginOtpForm(request.POST)
+        
+        if form.is_valid():
+            otp = form.cleaned_data['otp']
+            
+            if request.session and request.session.has_key("otp"):
+                try:
+                    if not timestamp_has_expired(request.session['otp']['exp']):
+                        # We compare the signature
+                        if validate_login_otp_signature(
+                            request.session['otp']['email'], 
+                            otp, request.session['otp']['id_token']):
+                            # They are equal we log in the user
+                            UserModel = get_user_model()
+                            
+                            user = UserModel.objects.filter(email=request.session['otp']['email']).first()
+                            if user is not None:
+                                app_login(request, user)
+                                messages.success(request, _t("Vous êtes connecté."))
+                                
+                                # Everything went OK
+                                return redirect('client-home')
+                            else:
+                                logger.error("User received OTP but does not exists")
+                                
+                                messages.error(_t("Veuillez réessayer"), extra_tags="danger")
+                                
+                                # The user will be reprompt the otp page
+                    else:
+                        messages.error(_t("Votre session a expirée"), extra_tags="danger")
+                except Exception as e:
+                    logger.error("User tried OTP: OTP Session is invalid")
+                    messages.error(_t("Votre session a expirée"), extra_tags="danger")
+                    pass
+            else:
+                messages.error(_t("Votre session a expirée"), extra_tags="danger")
+                
+                # Returns User to login screen
+                return redirect('client-auth-login')
+    else:
+        form = UserLoginOtpForm()
+        
+    
+    return render(
+        request,
+        'client/auth/login_otp.html',
+        {
+            'form': form
+        }
+    )
+    
 # [END] Login
 
 # [START] Recover Password
