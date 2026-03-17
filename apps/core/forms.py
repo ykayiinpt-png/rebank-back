@@ -36,3 +36,34 @@ class UserLoginForm(forms.Form):
 
 class UserLoginOtpForm(forms.Form):
     otp = forms.CharField(max_length=6, min_length=6, required=True)
+    
+class UserRecoverPassword(forms.Form):
+    email = forms.EmailField(required=True)
+    
+class UserRecoverPasswordValidate(forms.Form):
+    email = forms.EmailField(required=True)
+    token = forms.CharField(required=True)
+    exp = forms.CharField(required=True)
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        if cleaned_data['exp']:
+            try:
+                cleaned_data['exp'] = float(cleaned_data['exp'])
+            except Exception as e:
+                raise forms.ValidationError("Les informations sont incorrectes: exp")
+            
+        return cleaned_data
+    
+class UserRecoverPasswordSet(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput)
+    password_confirm = forms.CharField(widget=forms.PasswordInput)
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        pw = cleaned_data.get("password")
+        pw_conf = cleaned_data.get("password_confirm")
+        if pw and pw_conf and pw != pw_conf:
+            raise forms.ValidationError("Les mots de passe ne correspondent pas")
+        return cleaned_data

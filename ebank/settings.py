@@ -243,6 +243,9 @@ DEFAULT_FROM_EMAIL = "no-reply@rebank.com"
 # Hashing
 HMAC_SECRET = "abcd"
 
+# Auth
+RESET_PASSWORD_EXP_MINUTES=5
+
 # OTP
 OTP_LENGTH = 6
 OTP_EXP_DURATION_MINUTES = 6
@@ -252,3 +255,4 @@ SESSION_EXPIRE_MINUTES=30
 
 # Urls
 URL_REGISTATION_VALIDATION="http://127.0.0.1:8000/auth/register/validate?token={}&email={}"
+URL_RESET_PASSWORD_VALIDATION="http://127.0.0.1:8000/auth/password/reset/validate?token={}&email={}&exp={}"
