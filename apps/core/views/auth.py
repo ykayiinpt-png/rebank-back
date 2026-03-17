@@ -1,3 +1,4 @@
+import datetime
 import logging
 from datetime import timedelta
 
@@ -205,8 +206,11 @@ def login_otp(request: HttpRequest):
                             # Save a new login session for the authenticated user
                             BaseUserSession.objects.create(
                                 email=request.session['otp']['email'],
-                                exp=timezone.now() + timedelta(minutes=settings.SESSION_EXPIRE_MINUTES)
+                                exp=timezone.now() + timedelta(minutes=settings.LOGIN_SESSION_EXPIRE_MINUTES)
                             )
+                            
+                            # Set expiration of the login session
+                            request.session.set_expiry(timedelta(minutes=settings.LOGIN_SESSION_EXPIRE_MINUTES)) 
                             
                             # Login in the app
                             del request.session['otp']
