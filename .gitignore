@@ -1,0 +1,58 @@
+# Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+/static/
+/media/
+
+# IDE-specific files (optional, adjust as needed)
+.idea/
+.vscode/
+.spyderproject # For Spyder
+.spyproject
+
+# Vscode
+
+## Notebooks inputs
+notebooks/inputs/**
+notebooks/outputs/**
+notebooks/map_simulation/simulations/**
+notebooks/map_simulation/outputs/**
+
