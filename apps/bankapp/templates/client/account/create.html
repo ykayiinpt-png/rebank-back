@@ -1,0 +1,25 @@
+{% extends "layouts/client.html" %}
+{%load crispy_forms_tags%}
+
+
+{% block page_tile %}
+Nouveau Compte Bancaire
+{% endblock %}
+
+{% block body %}
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form | crispy }}
+
+            <button class="btn btn-md btn-success w-100">Ajouter un Compte</button>
+        </form>
+    </div>
+    <div class="col-md-4 md-offset-1">
+        <p>La création d'un compte bancaire est soumise à la validation par pièce d'identité.</p>
+    </div>
+</div>
+
+{% endblock %}

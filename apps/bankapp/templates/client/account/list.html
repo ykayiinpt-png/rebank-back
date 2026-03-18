@@ -1,0 +1,57 @@
+{% extends "layouts/client.html" %}
+
+{% block page_tile %}
+Comptes
+{% endblock %}
+
+{% block body %}
+
+<div class="row mb-3 justify-content-end">
+    <div class="col-md-12 d-flex justify-content-end">
+        <a href="/account/create" class="btn btn-dark">+ Ajouter un compte bancaire</a>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="bg-body rounded shadow-sm p-4">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Numéro</th>
+                    <th scope="col">Nom &amp; Prénom(s)</th>
+                    <th scope="col">Etat</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acc in accounts %}
+                <tr>
+                    <th scope="row">1</th>
+                    <td>
+                        {%  if acc.numero != None %}
+                            <strong>{{ acc.numero }}</strong>
+                        {% else %}
+                            <span class="badge rounded-pill bg-warning text-dark">Non Attribué</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ acc.first_name }} {{  acc.last_name }}</td>
+                    <td>
+                        {% if acc.approved %}
+                            <span class="badge rounded-pill bg-success">Validé</span>
+                        {% else %}
+                            <span class="badge rounded-pill bg-info text-dark">En Approbation...</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <th scope="row" colspan="5">Pas de compte(s) bancaire(s)</th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

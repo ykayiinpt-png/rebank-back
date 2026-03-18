@@ -1,11 +1,15 @@
 from django.contrib import admin
 from django.urls import path, include
-from .views import auth as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
+
+from .views import auth as auth_views, account as account_views
 
 urlpatterns = [
     path('', auth_views.home, name='client-home'),
     path('oops', auth_views.oops, name='client-oops'),
     
+    # Authentication
     path('auth/register', auth_views.register, name="client-auth-register"),
     path('auth/register/check', auth_views.register_to_validate, name="client-auth-register_to_validate"),
     path('auth/register/validate', auth_views.register_validate, name="client-auth-register_validate"),
@@ -20,4 +24,7 @@ urlpatterns = [
     path('auth/password/reset/check', auth_views.reset_password_check, name="client-auth-reset-password-check"),
     path('auth/password/reset/validate', auth_views.reset_password_validate, name="client-auth-reset-password-validate"),
     path('auth/password/reset/done', auth_views.reset_password_done, name="client-auth-reset-password-done"),
-]
+    
+    # Account
+    path('account', account_views.dashboard, name="client-account-dashboard")
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

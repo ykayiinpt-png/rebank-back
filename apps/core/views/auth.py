@@ -221,7 +221,7 @@ def login_otp(request: HttpRequest):
                             messages.success(request, _t("Vous êtes connecté."))
                             
                             # Everything went OK
-                            return redirect('client-home')
+                            return redirect('client-account-dashboard')
                         else:
                             logger.error("User received OTP but does not exists")
                             

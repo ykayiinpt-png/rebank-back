@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     
     # Apps
-    'apps.core'
+    'apps.core',
+    'apps.bankapp'
 ]
 
 MIDDLEWARE = [
@@ -170,7 +171,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# Define the directory where static files are collected
+STATIC_URL = '/static/'
+
+# This directory is used to store static files for your app
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # This is where you put your static files during development
+]
+
+# Directory to collect static files in production
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# URL that will serve media files
+MEDIA_URL = '/media/'
+
+# Directory where media files will be stored
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 LOGGING = {
