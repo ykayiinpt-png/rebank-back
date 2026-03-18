@@ -1,0 +1,35 @@
+{% extends "layouts/client.html" %}
+{%load crispy_forms_tags%}
+
+
+{% block page_tile %}
+Compte Bancaire - Mise à jour
+{% endblock %}
+
+{% block body %}
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form | crispy }}
+
+            <button class="btn btn-md btn-success w-100">Enrégistrer Modification</button>
+        </form>
+    </div>
+    <div class="col-md-4 md-offset-1">
+        {% if account.identity_file %}
+        <div class="form-group my-5">
+            <p>Pièce d'identité courante</p>
+            <img src="{{ account.identity_file.url }}" alt="{{ account.last_name }}" style="max-width: 400px;">
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-3">
+        <p>La création d'un compte bancaire est soumise à la validation par pièce d'identité.
+            Vous pouvez le modifier tant que celui n'a pas été approuvé
+        </p>
+    </div>
+</div>
+
+{% endblock %}

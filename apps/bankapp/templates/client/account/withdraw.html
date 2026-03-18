@@ -1,0 +1,25 @@
+{% extends "layouts/client.html" %}
+{%load crispy_forms_tags%}
+
+
+{% block page_tile %}
+Faire un Retrait
+{% endblock %}
+
+{% block body %}
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form method="post">
+            {% csrf_token %}
+            {{ form | crispy }}
+
+            <button class="btn btn-md btn-success w-100">Valider</button>
+        </form>
+    </div>
+    <div class="col-md-4 md-offset-1">
+        <p>Les retrait en espèces se font auprès d'un agent de la banque.</p>
+    </div>
+</div>
+
+{% endblock %}

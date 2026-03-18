@@ -15,8 +15,13 @@ class BankAccount(TimeStampedModel, SoftDeletedModel):
     # After an approbation, a numero will be assigned
     numero = models.BigIntegerField(null=True)
     
+    balance = models.BigIntegerField(default=0, null=False)
+    
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         null=False
     )
+    
+    def __str__(self):
+        return f"N° {self.numero} | {self.first_name} {self.last_name}"

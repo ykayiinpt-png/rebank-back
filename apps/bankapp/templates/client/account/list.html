@@ -1,5 +1,11 @@
 {% extends "layouts/client.html" %}
 
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/card.css' %}">
+{% endblock %}
+
 {% block page_tile %}
 Comptes
 {% endblock %}
@@ -10,6 +16,30 @@ Comptes
     <div class="col-md-12 d-flex justify-content-end">
         <a href="/account/create" class="btn btn-dark">+ Ajouter un compte bancaire</a>
     </div>
+</div>
+
+<div class="row mb-3" style="display: none;">
+    {% for acc in accounts %}
+    <div class="col-md-4 mb-4">
+        <div class="credit-card bg-primary text-white p-4 d-flex flex-column justify-content-between">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Classic Card</h4>
+                <i class="fab fa-cc-visa fa-2x"></i>
+            </div>
+            <div class="card-number my-3">
+                **** **** **** 1234
+            </div>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="card-holder">{{ acc.first_name }} {{ acc.last_name }}</div>
+                    <div>--</div>
+                </div>
+                <img src="https://www.svgrepo.com/show/362035/visa-3.svg" alt="Chip" width="40">
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    {% endfor %}
 </div>
 
 <div class="row mb-3">
@@ -29,19 +59,33 @@ Comptes
                 <tr>
                     <th scope="row">1</th>
                     <td>
-                        {%  if acc.numero != None %}
-                            <strong>{{ acc.numero }}</strong>
+                        {% if acc.numero != None %}
+                        <strong>{{ acc.numero }}</strong>
                         {% else %}
-                            <span class="badge rounded-pill bg-warning text-dark">Non Attribué</span>
+                        <span class="badge rounded-pill bg-warning text-dark">Non Attribué</span>
                         {% endif %}
                     </td>
-                    <td>{{ acc.first_name }} {{  acc.last_name }}</td>
+                    <td>{{ acc.first_name }} {{ acc.last_name }}</td>
                     <td>
                         {% if acc.approved %}
-                            <span class="badge rounded-pill bg-success">Validé</span>
+                        <span class="badge rounded-pill bg-success">Validé</span>
                         {% else %}
-                            <span class="badge rounded-pill bg-info text-dark">En Approbation...</span>
+                        <span class="badge rounded-pill bg-info text-dark">En Approbation...</span>
                         {% endif %}
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ forloop.counter }}"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
+                                {% if acc.approved %}
+                                <li><a class="dropdown-item" href="/account/detail/{{ acc.id }}">Voir Détail</a></li>
+                                {% else %}
+                                <li><a class="dropdown-item" href="/account/edit/{{ acc.id }}">Editer</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
