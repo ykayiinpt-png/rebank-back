@@ -5,6 +5,8 @@ from django.conf.urls.static import static
 
 from .views import auth as auth_views, account as account_views
 
+from .apis.urls import urlpatterns as api_urlpatters
+
 urlpatterns = [
     path('', auth_views.home, name='client-home'),
     path('oops', auth_views.oops, name='client-oops'),
@@ -26,5 +28,5 @@ urlpatterns = [
     path('auth/password/reset/done', auth_views.reset_password_done, name="client-auth-reset-password-done"),
     
     # Account
-    path('account', account_views.dashboard, name="client-account-dashboard")
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('account', account_views.dashboard, name="client-account-dashboard")    
+] +  api_urlpatters + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

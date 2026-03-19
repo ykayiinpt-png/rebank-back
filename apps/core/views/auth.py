@@ -14,6 +14,7 @@ from django.views.decorators.http import require_GET, require_POST, require_http
 from apps.core.helpers.mail import send_template_email
 from apps.core.helpers.time import timestamp_has_expired
 from apps.core.models.auth import BaseUserSession
+from apps.core.services.auth import AuthService
 from apps.core.services.user_account import generate_registration_token, generate_reset_password_token, send_login_otp, validate_login_otp_signature, validate_registration_token, validate_reset_password_token
 
 from ..forms import UserLoginForm, UserLoginOtpForm, UserRecoverPassword, UserRecoverPasswordSet, UserRecoverPasswordValidate, UserRegisterForm, UserRegisterValidationForm
@@ -38,44 +39,21 @@ def register(request: HttpRequest):
         form = UserRegisterForm(request.POST)
         
         if form.is_valid():
-            UserModel = get_user_model()
-            
-            # Get data
-            email = form.cleaned_data.get('email')
-            
-            # Validate user and email existence
-            existing_user = UserModel.objects.filter(email=email).first()
-            if existing_user is not None:
-                # Check if user is active
-                if existing_user.is_active:
-                    # We return an error message
-                    messages.error(request, _t("Ce compte existe déjà; veuillez vérifier votre email"))
-                else:
-                    # Check if we do have pass 1 hours since the first registration
-                    if timezone.now() - existing_user.updated_at > timedelta(hours=1) :
-                        # We resend the account registration validation email
-                        existing_user.save() # We do this in order to have updated_at updated
-                        
-                        generate_registration_token(
-                            email,
-                            True
-                        )
-                        messages.success(request, _t("Enrégistrement Réussi Nous vous invitons à vérifier votre email"))
-                    else:
-                        # Call the user to check its email
-                        messages.success(request, _t("Nous vous avions envoyé un mail de confirmation"))
-            else:
-                # Lutilisateur n'existe pas
-                # on sauveagarde l'utilisateur et on lui envoi un mail
-                form.save()
-                
-                generate_registration_token(
-                    email, True
+            try:
+                _, verification_sent, verification_resent, check_email = AuthService.register_user(
+                     form.cleaned_data.get('email'), form.cleaned_data.get('password1')
                 )
                 
-                messages.success(request, _t("Enrégistrement Réussi Nous vous invitons à vérifier votre email"))
-            
-            return redirect('client-auth-register_to_validate')
+                if verification_sent:
+                    messages.success(request, _t("Enrégistrement Réussi Nous vous invitons à vérifier votre email"))
+                elif verification_resent:
+                    messages.success(request, _t("Email Renvoyé. Nous vous invitons à vérifier votre email"))
+                elif check_email:
+                    messages.success(request, _t("Nous vous avions envoyé un mail de confirmation"))
+                    
+                return redirect('client-auth-register_to_validate')
+            except Exception as e:
+                messages.error(request, str(e), extra_tags="danger")
     else:
         form = UserRegisterForm()
         

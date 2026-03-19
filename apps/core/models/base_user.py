@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
+
+from apps.core.managers.user_manager import AppBaseUserManager
 from .base import TimeStampedModel, SoftDeletedModel
 
 class BaseUser(AbstractUser, PermissionsMixin, TimeStampedModel, SoftDeletedModel):
@@ -26,6 +28,7 @@ class BaseUser(AbstractUser, PermissionsMixin, TimeStampedModel, SoftDeletedMode
     is_superuser = models.BooleanField(default=False)
     
     
+    objects = AppBaseUserManager()
     
     # Meta definition
     USERNAME_FIELD = 'email'

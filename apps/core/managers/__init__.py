@@ -1,1 +1,1 @@
-from .user_manager import BaseUserManager
+from .user_manager import AppBaseUserManager

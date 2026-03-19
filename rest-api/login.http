@@ -1,0 +1,6 @@
+POST http://127.0.0.1:8000/api/auth/refresh_token
+Content-Type: application/json
+
+{
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3Mzk3Nzc0MiwiaWF0IjoxNzczODkxMzQyLCJqdGkiOiJlN2ZjOWVlZDM0N2Y0NzQ2OWE3MTdlYWZhODA1ODlhZCIsInVzZXJfaWQiOiI2In0.MfNwIAvO4vzVGU-DHPubAxpfvOTn0kg2cQBGQVQeVYg"
+}
