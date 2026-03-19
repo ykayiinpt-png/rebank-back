@@ -33,7 +33,9 @@ SECRET_KEY = 'django-insecure-h&00a512d%z8h64mdz0w&6x66$(a%4h=wm+29ob!--2$3qx@co
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "*"
+]
 
 
 # Application definition
@@ -171,7 +173,7 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
-SIGNING_KEY_PATH = os.environ.get('SIGNING_KEY_PATH', 'E:\\N\\ebank\myenv\\jwt_private.key')
+SIGNING_KEY_PATH = os.environ.get('SIGNING_KEY_PATH', 'E:\\N\\ebank\\myenv\\jwt_private.key')
 VERIFYING_KEY_PATH = os.environ.get('VERIFYING_KEY_PATH', 'E:\\N\\ebank\\myenv\\jwt_public.key')
 
 
@@ -187,6 +189,9 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Rebank API',
     'DESCRIPTION': 'API documentation',
     'VERSION': '1.0.0',
+    'SERVERS': [
+        {'url': 'http://127.0.0.1:8000/', 'description': 'Development Server'},
+    ],
 }
 
 
