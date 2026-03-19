@@ -16,6 +16,8 @@ class BaseUser(AbstractUser, PermissionsMixin, TimeStampedModel, SoftDeletedMode
         }
     )
     
+    salt = models.CharField(null=False, max_length=50)
+    
     first_name = models.CharField(max_length=30, null=True)
     last_name = models.CharField(max_length=30, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)

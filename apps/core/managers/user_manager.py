@@ -1,5 +1,7 @@
 from django.contrib.auth.models import BaseUserManager
 
+from apps.core.helpers.string import generate_random_string
+
 class AppBaseUserManager(BaseUserManager):
     
     def _create_user(self, email, password, **extra_fields):
@@ -8,7 +10,11 @@ class AppBaseUserManager(BaseUserManager):
         email = self.normalize_email(email)
         
         user = self.model(email=email, username=email,  **extra_fields)
-        user.set_password(password)
+        user.salt = generate_random_string(20)
+        
+        salted_password = password + user.salt
+        
+        user.set_password(salted_password)
         user.save(using=self._db)
         return user
     
