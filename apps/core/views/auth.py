@@ -347,7 +347,7 @@ def reset_password_validate(request: HttpRequest):
             
             existing_user = UserModel.objects.filter(email=request.session['r_password']['email']).first()
             if existing_user:
-                existing_user.set_password(form.cleaned_data['password'])
+                existing_user.set_password(form.cleaned_data['password'] + existing_user.salt)
                 existing_user.save()
                 
                 send_template_email(

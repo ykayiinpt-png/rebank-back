@@ -56,3 +56,6 @@ notebooks/outputs/**
 notebooks/map_simulation/simulations/**
 notebooks/map_simulation/outputs/**
 
+# Myenv
+myenv
+myenv/**

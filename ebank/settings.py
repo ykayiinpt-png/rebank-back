@@ -14,6 +14,12 @@ from pathlib import Path
 import os
 from datetime import timedelta
 
+def read_key_file(filename):
+    if os.path.isfile(filename):
+        with open(filename, 'r') as f:
+            return f.read()
+    return None
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -165,9 +171,16 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
+SIGNING_KEY_PATH = os.environ.get('SIGNING_KEY_PATH', 'E:\\N\\ebank\myenv\\jwt_private.key')
+VERIFYING_KEY_PATH = os.environ.get('VERIFYING_KEY_PATH', 'E:\\N\\ebank\\myenv\\jwt_public.key')
+
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ALGORITHM': 'RS256',
+    'SIGNING_KEY': read_key_file(SIGNING_KEY_PATH),
+    'VERIFYING_KEY': read_key_file(VERIFYING_KEY_PATH),
 }
 
 SPECTACULAR_SETTINGS = {
