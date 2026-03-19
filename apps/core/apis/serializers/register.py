@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _t
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(
         required=True,
         error_messages={
@@ -20,9 +20,5 @@ class RegisterSerializer(serializers.ModelSerializer):
             "required": _t("L'attribut password est requis")
         }
     )
-    
-    class Meta:
-        model = get_user_model()
-        fields = ('email', 'password')
         
         
