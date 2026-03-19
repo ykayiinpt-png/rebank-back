@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.utils.translation import gettext as _t
+from django.core.exceptions import ValidationError
 
 from apps.core.apis.serializers.register import RegisterSerializer
 from apps.core.services.auth import AuthService
@@ -16,9 +17,6 @@ class RegisterView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         
         try:
-            
-            print(request.data, serializer.data)
-            
             _, verification_sent, verification_resent, check_email = AuthService.register_user(
                 serializer.data['email'], serializer.data['password']
             )
@@ -33,8 +31,10 @@ class RegisterView(CreateAPIView):
             
             return Response({"message": message}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            raise e
-            return Response({"message": str(e) }, status=status.HTTP_417_EXPECTATION_FAILED)
+            message = str(e)
+            if isinstance(e, ValidationError):
+                message = e.message
+            return Response({"message": message}, status=status.HTTP_417_EXPECTATION_FAILED)
         
         
     

@@ -1,0 +1,20 @@
+POST http://127.0.0.1:8000/api/accounts/
+Content-Type: multipart/form-data; boundary=***boundary***
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzczOTQzNzY5LCJpYXQiOjE3NzM5NDE5NjksImp0aSI6ImU2YWE3ZDIzMmU2OTQ1OTY5MmI1YTA5NThmMmFhODQ2IiwidXNlcl9pZCI6IjIifQ.n8qsPmxlVeZ1XxXPJHGEYTDkXV0TjaK8tDZPpcIqFVAZFwT9ACujiiYqbZ_Wi_ILtek5w4sUU6I1N3XRE8vWHqFwcz5Ec3WiXarKRmVEZfQWujzfShwscT_xb9_wRCbteleaEKg5Ajq0-SRLRf2fsRKZ6q2VwGEdjvzw-fpqJS-PLY2NLzTty1Nxqep4Okaoz8ffXF-21KZRP_9ASSVLiVD0igjhhklMTbEZBcYTlV2DYJo_a0tJR7LECO30-_YanMM7KrSfd7tLlDZzVw4nSSFmikrokMRcsWxAty_BBHtEAXxFSUoKCxBK1ehWtF7brzVgpO76woyZCUQxBay7_w
+
+--***boundary***
+Content-Disposition: form-data; name="first_name"
+
+Tata
+
+--***boundary***
+Content-Disposition: form-data; name="last_name"
+
+Tutu
+
+--***boundary***
+Content-Disposition: form-data; name="identity_file"; filename="my_file.png"
+Content-Type: image/png
+
+< D:\empriente1.png
+--***boundary***--

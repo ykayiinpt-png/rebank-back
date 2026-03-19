@@ -32,12 +32,9 @@ class AuthService:
         verification_resent = None
         check_email = None
         
-        print(f'Email: {email}')
-        
         # Validate user and email existence
         existing_user = UserModel.objects.filter(email=email).first()
         if existing_user is not None:
-            print("User exists")
             # Check if user is active
             if existing_user.is_active:
                 # We return an error message
@@ -55,7 +52,6 @@ class AuthService:
                     # Call the user to check its email
                     check_email = True
         else:
-            print("User does not exist")
             # Lutilisateur n'existe pas
             # on sauveagarde l'utilisateur et on lui envoi un mail
             user = UserModel.objects.create_user(email, password)

@@ -81,7 +81,7 @@ class TransactionService:
         if source_account is None:
             raise ValidationError(_t("Le compte bancaire source n'existe pas"))
         
-        if source_account.numero == destination_account_n:
+        if str(source_account.numero) == destination_account_n:
             raise ValidationError(_t("Impossible de transférer vers le même compte."))
         
         if not source_account.approved:

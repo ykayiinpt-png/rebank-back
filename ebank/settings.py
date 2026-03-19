@@ -178,7 +178,7 @@ VERIFYING_KEY_PATH = os.environ.get('VERIFYING_KEY_PATH', 'E:\\N\\ebank\\myenv\\
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=300),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ALGORITHM': 'RS256',
     'SIGNING_KEY': read_key_file(SIGNING_KEY_PATH),
