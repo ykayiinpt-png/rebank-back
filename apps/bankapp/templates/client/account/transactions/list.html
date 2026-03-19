@@ -66,6 +66,10 @@ Liste des transactions
                         {{ transaction.created_at|date:"F j, Y, P" }}
                     </td>
                 </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">Pas de transaction(s)</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>

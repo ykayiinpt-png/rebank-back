@@ -49,7 +49,11 @@
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item" href="#">Déconnexion</a></li>
+              <li>
+                <form action="/auth/logout" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-default text-danger">Déconnexion</button>
+                </form>
             </ul>
           </li>
         </ul>

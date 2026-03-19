@@ -16,6 +16,7 @@ from apps.core.helpers.time import timestamp_has_expired
 from apps.core.models.auth import BaseUserSession
 from apps.core.services.auth import AuthService
 from apps.core.services.user_account import generate_registration_token, generate_reset_password_token, send_login_otp, validate_login_otp_signature, validate_registration_token, validate_reset_password_token
+from apps.core.decorators.auth import app_login_required
 
 from ..forms import UserLoginForm, UserLoginOtpForm, UserRecoverPassword, UserRecoverPasswordSet, UserRecoverPasswordValidate, UserRegisterForm, UserRegisterValidationForm
 
@@ -228,6 +229,7 @@ def login_otp(request: HttpRequest):
 # [END] Login
 
 # [START] Logout
+@app_login_required()
 @require_POST
 def logout(request: HttpRequest):
     if request.user.is_authenticated:
@@ -238,9 +240,11 @@ def logout(request: HttpRequest):
         
         logger.info(f'User {request.user.email} login session has been invalidated')
         
+        tmp_email = request.user.email
+         
         app_logout(request)
         
-        logger.info(f'User {request.user.email} logged out')
+        logger.info(f'User {tmp_email} logged out')
     
     return redirect('client-home')
 
