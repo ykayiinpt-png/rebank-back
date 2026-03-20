@@ -1,0 +1,67 @@
+{% extends "layouts/staff.html" %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/card.css' %}">
+{% endblock %}
+
+{% block page_tile %}
+Comptes
+{% endblock %}
+
+{% block body %}
+
+<div class="row mb-3">
+    <div class="bg-body rounded shadow-sm p-4">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Numéro</th>
+                    <th scope="col">Nom &amp; Prénom(s)</th>
+                    <th scope="col">Etat</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acc in accounts %}
+                <tr>
+                    <th scope="row">1</th>
+                    <td>
+                        {% if acc.numero != None %}
+                        <strong>{{ acc.numero }}</strong>
+                        {% else %}
+                        <span class="badge rounded-pill bg-warning text-dark">Non Attribué</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ acc.first_name }} {{ acc.last_name }}</td>
+                    <td>
+                        {% if acc.approved %}
+                        <span class="badge rounded-pill bg-success">Validé</span>
+                        {% else %}
+                        <span class="badge rounded-pill bg-info text-dark">En Approbation...</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ forloop.counter }}"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
+                                <li><a class="dropdown-item" href="/staff/accounts/detail/{{ acc.id }}">Voir Détail</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <th scope="row" colspan="5">Pas de compte(s) bancaire(s)</th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

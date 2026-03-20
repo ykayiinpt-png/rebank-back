@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     
     # Apps
     'apps.core',
-    'apps.bankapp'
+    'apps.bankapp',
+    'apps.staffapp'
 ]
 
 MIDDLEWARE = [

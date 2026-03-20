@@ -16,10 +16,13 @@ class BankDepositForm(forms.Form):
         label=_t("Montant")
     )
 
-    def __init__(self, *args, user=None, **kwargs):
+    def __init__(self, *args, user=None, accounts=None, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['account'].choices = [ (m.pk, str(m)) for m in  BankAccount.objects.filter(user=user, approved=True)]
+            
+        if accounts:
+            self.fields['account'].choices = [ (m.pk, str(m)) for m in accounts ]
             
             
 class BankWithdrawForm(forms.Form):

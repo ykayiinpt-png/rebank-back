@@ -1,0 +1,20 @@
+{% extends "layouts/auth.html" %}
+{%load crispy_forms_tags%}
+
+
+{% block body %}
+<div class="row mb-3 text-center fs-3 fw-bold">
+    <p>Staff - Se Connecter | OTP</p>
+</div>
+
+<div class="row mb-3">
+    <form method="post">
+    {% csrf_token %}
+    {{ form | crispy }}
+
+    <button class="btn btn-md btn-primary w-100" >Valider</button>
+</form>
+</div>
+
+
+{% endblock  %}

@@ -15,18 +15,3 @@ def app_login_required():
             return redirect('client-auth-login')
         return _wrapped_view
     return decorator
-
-
-def app_login_staff_required():
-    """
-    Login required in application
-    """
-    
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request: HttpRequest, *args, **kwargs):
-            if request.user.is_authenticated and request.user.is_staff:
-                return view_func(request, *args, **kwargs)
-            return redirect('staff-auth-login')
-        return _wrapped_view
-    return decorator

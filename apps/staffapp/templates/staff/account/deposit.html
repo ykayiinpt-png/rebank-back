@@ -1,0 +1,25 @@
+{% extends "layouts/staff.html" %}
+{%load crispy_forms_tags%}
+
+
+{% block page_tile %}
+Faire un Dépôt
+{% endblock %}
+
+{% block body %}
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form method="post">
+            {% csrf_token %}
+            {{ form | crispy }}
+
+            <button class="btn btn-md btn-primary w-100">Valider</button>
+        </form>
+    </div>
+    <div class="col-md-4 md-offset-1">
+        <p>Veuillez informer le détenteur du compte une fois le dépôt fait.</p>
+    </div>
+</div>
+
+{% endblock %}

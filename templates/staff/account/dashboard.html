@@ -1,0 +1,18 @@
+{% extends "layouts/staff.html" %}
+{%load crispy_forms_tags%}
+
+
+{% block page_tile %}
+Tableau de bord
+{% endblock %}
+
+{% block body %}
+<div class="mb-3">
+    Comptes Bancaire: {{ account }}
+</div>
+
+<div class="mb-3">
+    Transactions: 0
+</div>
+
+{% endblock  %}
