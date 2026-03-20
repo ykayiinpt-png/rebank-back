@@ -1,3 +1,10 @@
+# Run development
+
+```bash
+python manage.py runserver --settings=ebank.settings.development
+```
+
+
 # Jwt
 
 ```bash

@@ -59,3 +59,8 @@ notebooks/map_simulation/outputs/**
 # Myenv
 myenv
 myenv/**
+
+# Settings for configuration
+ebank\settings\development.py
+ebank\settings\production.py
+ebank\settings\sandbox.py
