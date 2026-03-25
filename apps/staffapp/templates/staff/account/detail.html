@@ -52,7 +52,8 @@ Compte N° {{ account.numero }}
             </div>
         </div>
     </div>
-    <div class="col-md-4"> 
+    <div class="col-md-4">
+        {% if account.approved %}
         <div class="p-4 shadow">
             <h5>Balance</h5>
             <div class="text-end" style="font-size: 1.4em;">
@@ -66,6 +67,7 @@ Compte N° {{ account.numero }}
                 </div>
             </div>
         </div>
+        {% endif %}
 
 
         {% if not account.approved %}
@@ -93,6 +95,7 @@ Compte N° {{ account.numero }}
     </div>
 
     <div class="col-md-4">
+        {% if account.approved %}
         <h5>Liste Transactions</h5>
 
         <div class="mt-3">
@@ -160,6 +163,7 @@ Compte N° {{ account.numero }}
             <p class="mt-5">Pas de transaction</p>
             {% endfor %}
         </div>
+        {% endif %}
     </div>
 </div>
 
