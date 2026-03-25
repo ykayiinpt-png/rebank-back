@@ -119,19 +119,22 @@ def login_otp(request: HttpRequest):
                         else:
                             logger.error("User received OTP but does not exists")
                             
-                            messages.error(_t("Veuillez réessayer"), extra_tags="danger")
+                            messages.error(request, _t("Veuillez réessayer"), extra_tags="danger")
                             
-                            # The user will be reprompt the otp page
+                            return redirect('staff-auth-login')
+                    else:
+                        messages.error(request, _t("Votre otp est incorrect"), extra_tags="danger")
                 else:
-                    messages.error(_t("Votre session est expiré"), extra_tags="danger")
+                    messages.error(request, _t("Votre session est expiré"), extra_tags="danger")
+                    return redirect('staff-auth-login')
             except Exception as e:
                 logger.error("User tried OTP: OTP Session is invalid")
-                messages.error(_t("Votre session est expirée"), extra_tags="danger")
+                messages.error(request, _t("Votre session est expirée"), extra_tags="danger")
+                return redirect('staff-auth-login')
                 
     else:
         # We have a get request
         form = UserLoginOtpForm()
-        
     
     return render(
         request,
