@@ -1,6 +1,6 @@
 from rest_framework.generics import CreateAPIView
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import serializers as drf_serializers, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,36 +9,73 @@ from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.core.apis.serializers.login import LoginOtpSerializer, LoginResponseSerializer, LoginSerializer, LoginTokensSerializer
-from apps.core.apis.serializers.register import RegisterSerializer
+from apps.core.apis.serializers.register import RegisterOtpSerializer, RegisterResponseSerializer, RegisterSerializer
 from apps.core.services.auth import AuthService
+
 
 class RegisterView(CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = (AllowAny,)
-        
+
+    @extend_schema(request=RegisterSerializer, responses={201: RegisterResponseSerializer})
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         try:
-            _, verification_sent, verification_resent, check_email = AuthService.register_user(
-                serializer.data['email'], serializer.data['password']
+            _, id_token, otp_exp, verification_sent, verification_resent, check_email = AuthService.register_user(
+                serializer.data['email'], serializer.data['password'], use_otp=True
             )
-            
+
             message = ""
             if verification_sent:
-                message = _t("Enrégistrement Réussi Nous vous invitons à vérifier votre email")
+                message = _t("Enrégistrement Réussi. Un code OTP a été envoyé à votre email")
             elif verification_resent:
-                message = _t("Email Renvoyé. Nous vous invitons à vérifier votre email")
+                message = _t("Code OTP renvoyé. Veuillez vérifier votre email")
             elif check_email:
-                message = _t("Nous vous avions envoyé un mail de confirmation")
-            
-            return Response({"message": message}, status=status.HTTP_201_CREATED)
+                message = _t("Nous vous avions envoyé un code de confirmation")
+
+            response_data = {"message": message}
+            if id_token and otp_exp:
+                response_data["id_token"] = id_token
+                response_data["otp_exp"] = otp_exp
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
         except Exception as e:
             message = str(e)
             if isinstance(e, ValidationError):
                 message = e.message
             return Response({"message": message}, status=status.HTTP_417_EXPECTATION_FAILED)
+
+
+class RegisterOtpView(APIView):
+    permission_classes = (AllowAny,)
+
+    @extend_schema(request=RegisterOtpSerializer, responses={200: inline_serializer(
+        name='RegisterOtpResponse',
+        fields={'message': drf_serializers.CharField()}
+    )})
+    def post(self, request, *args, **kwargs):
+        serializer = RegisterOtpSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                AuthService.register_verify_otp(
+                    serializer.validated_data['id_token'],
+                    serializer.validated_data['otp'],
+                    serializer.validated_data['otp_exp'],
+                    serializer.validated_data['email'],
+                )
+                return Response(
+                    {"message": _t("Compte vérifié avec succès. Vous pouvez maintenant vous connecter")},
+                    status=status.HTTP_200_OK
+                )
+            except Exception as e:
+                message = str(e)
+                if isinstance(e, ValidationError):
+                    message = e.message
+                return Response({"message": message}, status=status.HTTP_417_EXPECTATION_FAILED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         
 
@@ -49,7 +86,7 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                id_token, otp_exp = AuthService.login_user(serializer.validated_data['email'], serializer.validated_data['email'])
+                id_token, otp_exp = AuthService.login_user(serializer.validated_data['email'], serializer.validated_data['password'])
                 
                 return Response({ "id_token": id_token, "otp_exp": otp_exp })
             except Exception as e:

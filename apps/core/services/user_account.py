@@ -66,8 +66,41 @@ def validate_login_otp_signature(email: str, otp: str, id_token: str):
     """
     input = f"{email}-{otp}"
     expect_token = hmac_sha256_hash(settings.HMAC_SECRET, input)
-    
+
     return expect_token == id_token
+
+
+def send_registration_otp(email, send=True):
+    """
+    Generates an OTP for registration email verification, sends it
+    to the provided email and returns the identifier token and its
+    expiry date in timestamp.
+    """
+    otp = otp_generate()
+    expiry_time = timezone.now() + timedelta(minutes=settings.OTP_EXP_DURATION_MINUTES)
+
+    input = f"{email}-{otp}-register"
+    token = hmac_sha256_hash(settings.HMAC_SECRET, input)
+
+    if send:
+        send_template_email(
+            "Vérification de Compte - OTP",
+            "client_registration_otp",
+            { "otp": otp },
+            email
+        )
+
+    return token, expiry_time.timestamp()
+
+
+def validate_registration_otp_signature(email: str, otp: str, id_token: str):
+    """
+    Validate a provided registration OTP against a generated one
+    """
+    input = f"{email}-{otp}-register"
+    expected_token = hmac_sha256_hash(settings.HMAC_SECRET, input)
+
+    return expected_token == id_token
     
 
 def generate_reset_password_token(email, send=False):

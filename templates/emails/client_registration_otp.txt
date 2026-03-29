@@ -1,0 +1,9 @@
+Vérification de Compte
+
+Veuillez trouver le code OTP pour la vérification de votre compte:
+
+{{ otp }}
+
+Ce code expire dans 6 minutes.
+
+Merci

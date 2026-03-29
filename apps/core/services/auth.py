@@ -11,7 +11,10 @@ from django.contrib.auth import authenticate
 
 from apps.core.helpers.time import timestamp_has_expired
 from apps.core.models.auth import BaseUserSession
-from apps.core.services.user_account import generate_registration_token, send_login_otp, validate_login_otp_signature
+from apps.core.services.user_account import (
+    generate_registration_token, send_login_otp, validate_login_otp_signature,
+    send_registration_otp, validate_registration_otp_signature
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,45 +26,75 @@ UserModel = get_user_model()
 class AuthService:
     
     @staticmethod
-    def register_user(email: str, password: str):
+    def register_user(email: str, password: str, use_otp: bool = False):
         """
-        Register a new user and sent email confirmation
-        
-        :returns user, is_success, verification_sent, verification_resent, check_email
+        Register a new user and send verification email.
+
+        When use_otp=True (mobile app): sends an OTP code by email.
+        :returns user, id_token, otp_exp, verification_sent, verification_resent, check_email
+
+        When use_otp=False (web, default): sends a token link by email (original behavior).
+        :returns user, verification_sent, verification_resent, check_email
         """
-        
+
         user = None
+        id_token = None
+        otp_exp = None
         verification_sent = None
         verification_resent = None
         check_email = None
-        
+
         # Validate user and email existence
         existing_user = UserModel.objects.filter(email=email).first()
         if existing_user is not None:
             # Check if user is active
             if existing_user.is_active:
-                # We return an error message
                 raise ValidationError(_t("Ce compte existe déjà; veuillez vérifier votre email"))
             else:
                 # Check if we do have pass 1 hours since the first registration
                 if timezone.now() - existing_user.updated_at > timedelta(hours=1) :
-                    # We resend the account registration validation email
-                    existing_user.save() # We do this in order to have updated_at updated
-                        
-                    generate_registration_token(email, True)
-                    
+                    existing_user.save()
+                    if use_otp:
+                        id_token, otp_exp = send_registration_otp(email, True)
+                    else:
+                        generate_registration_token(email, True)
                     verification_resent = True
                 else:
-                    # Call the user to check its email
                     check_email = True
         else:
-            # Lutilisateur n'existe pas
-            # on sauveagarde l'utilisateur et on lui envoi un mail
             user = UserModel.objects.create_user(email, password)
-            generate_registration_token(email, True)
+            if use_otp:
+                id_token, otp_exp = send_registration_otp(email, True)
+            else:
+                generate_registration_token(email, True)
             verification_sent = True
-            
-        return user, verification_sent, verification_resent, check_email
+
+        if use_otp:
+            return user, id_token, otp_exp, verification_sent, verification_resent, check_email
+        else:
+            return user, verification_sent, verification_resent, check_email
+
+    @staticmethod
+    def register_verify_otp(id_token: str, otp: str, exp: float, email: str):
+        """
+        Validate the registration OTP and activate the user account.
+
+        :returns user
+        """
+
+        if validate_registration_otp_signature(email, otp, id_token):
+            if not timestamp_has_expired(exp):
+                user = UserModel.objects.filter(email=email).first()
+                if user is not None:
+                    user.is_active = True
+                    user.save()
+                    return user
+                else:
+                    raise ValidationError(_t("Utilisateur introuvable"))
+            else:
+                raise ValidationError(_t("Le code OTP a expiré"))
+        else:
+            raise ValidationError(_t("Le code OTP est invalide"))
     
     @staticmethod
     def login_user(email: str, password: str):
