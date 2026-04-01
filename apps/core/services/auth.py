@@ -13,7 +13,9 @@ from apps.core.helpers.time import timestamp_has_expired
 from apps.core.models.auth import BaseUserSession
 from apps.core.services.user_account import (
     generate_registration_token, send_login_otp, validate_login_otp_signature,
-    send_registration_otp, validate_registration_otp_signature
+    send_registration_otp, validate_registration_otp_signature,
+    send_reset_password_otp, validate_reset_password_otp_signature,
+    generate_reset_confirm_token, validate_reset_confirm_token
 )
 
 logger = logging.getLogger(__name__)
@@ -162,4 +164,57 @@ class AuthService:
                raise ValidationError(_t("Votre session est expiré")) 
         else:
             raise ValidationError(_t("Vos informations sont invalide"))
+
+    @staticmethod
+    def reset_password_request(email: str):
+        """
+        Step 1: Send a reset password OTP to the user's email.
+
+        :returns id_token, otp_exp
+        """
+        user = UserModel.objects.filter(email=email, is_active=True).first()
+        if user is None:
+            raise ValidationError(_t("Aucun compte actif trouvé avec cet email"))
+
+        id_token, otp_exp = send_reset_password_otp(email, True)
+        return id_token, otp_exp
+
+    @staticmethod
+    def reset_password_verify_otp(id_token: str, otp: str, exp: float, email: str):
+        """
+        Step 2: Verify the reset password OTP.
+        Returns a reset_token that authorizes the password change.
+
+        :returns reset_token, reset_exp
+        """
+        if validate_reset_password_otp_signature(email, otp, id_token):
+            if not timestamp_has_expired(exp):
+                user = UserModel.objects.filter(email=email, is_active=True).first()
+                if user is not None:
+                    reset_token, reset_exp = generate_reset_confirm_token(email)
+                    return reset_token, reset_exp
+                else:
+                    raise ValidationError(_t("Utilisateur introuvable"))
+            else:
+                raise ValidationError(_t("Le code OTP a expiré"))
+        else:
+            raise ValidationError(_t("Le code OTP est invalide"))
+
+    @staticmethod
+    def reset_password_confirm(reset_token: str, reset_exp: float, email: str, new_password: str):
+        """
+        Step 3: Set the new password after OTP verification.
+
+        :returns user
+        """
+        if validate_reset_confirm_token(email, reset_exp, reset_token):
+            user = UserModel.objects.filter(email=email, is_active=True).first()
+            if user is not None:
+                user.set_password(new_password + user.salt)
+                user.save()
+                return user
+            else:
+                raise ValidationError(_t("Utilisateur introuvable"))
+        else:
+            raise ValidationError(_t("Lien de réinitialisation invalide ou expiré"))
         

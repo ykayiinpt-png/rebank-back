@@ -103,6 +103,62 @@ def validate_registration_otp_signature(email: str, otp: str, id_token: str):
     return expected_token == id_token
     
 
+def send_reset_password_otp(email, send=True):
+    """
+    Generates an OTP for password reset, sends it to the provided email
+    and returns the identifier token and its expiry date in timestamp.
+    """
+    otp = otp_generate()
+    expiry_time = timezone.now() + timedelta(minutes=settings.RESET_PASSWORD_EXP_MINUTES)
+
+    input = f"{email}-{otp}-reset_password"
+    token = hmac_sha256_hash(settings.HMAC_SECRET, input)
+
+    if send:
+        send_template_email(
+            "Réinitialisation de Mot de Passe - OTP",
+            "client_reset_password_otp",
+            { "otp": otp },
+            email
+        )
+
+    return token, expiry_time.timestamp()
+
+
+def validate_reset_password_otp_signature(email: str, otp: str, id_token: str):
+    """
+    Validate a provided reset password OTP against a generated one
+    """
+    input = f"{email}-{otp}-reset_password"
+    expected_token = hmac_sha256_hash(settings.HMAC_SECRET, input)
+
+    return expected_token == id_token
+
+
+def generate_reset_confirm_token(email: str):
+    """
+    Generate a short-lived token that proves the user has verified their OTP.
+    Used to authorize the actual password change.
+    """
+    exp = (timezone.now() + timedelta(minutes=settings.RESET_PASSWORD_EXP_MINUTES)).timestamp()
+    input = f"{email}-{exp}-reset_confirmed"
+    token = hmac_sha256_hash(settings.HMAC_SECRET, input)
+    return token, exp
+
+
+def validate_reset_confirm_token(email: str, exp: float, token: str):
+    """
+    Validate the reset confirm token signature and expiration.
+    """
+    input = f"{email}-{exp}-reset_confirmed"
+    expected = hmac_sha256_hash(settings.HMAC_SECRET, input)
+    if expected != token:
+        return False
+    if timestamp_has_expired(expiry_timestamp=exp):
+        return False
+    return True
+
+
 def generate_reset_password_token(email, send=False):
     """
     After a recover password a token is generated base on the
