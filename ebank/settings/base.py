@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
-    
+    "corsheaders",
+
     # Apps
     'apps.core',
     'apps.bankapp',
@@ -65,6 +66,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -174,8 +176,8 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
-SIGNING_KEY_PATH = os.environ.get('SIGNING_KEY_PATH', 'E:\\N\\ebank\\myenv\\jwt_private.key')
-VERIFYING_KEY_PATH = os.environ.get('VERIFYING_KEY_PATH', 'E:\\N\\ebank\\myenv\\jwt_public.key')
+SIGNING_KEY_PATH = os.environ.get('SIGNING_KEY_PATH', os.path.join(BASE_DIR, 'jwt_private.key'))
+VERIFYING_KEY_PATH = os.environ.get('VERIFYING_KEY_PATH', os.path.join(BASE_DIR, 'jwt_public.key'))
 
 
 SIMPLE_JWT = {
@@ -287,8 +289,8 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 #LOGIN_REDIRECT_URL=
 
 # Email Configuration
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-#EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+#EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = "127.0.0.1"
 EMAIL_PORT = 1025 
 EMAIL_USE_TLS = False
@@ -313,3 +315,6 @@ OTP_EXP_DURATION_MINUTES = 6
 # Urls
 URL_REGISTATION_VALIDATION="http://127.0.0.1:8000/auth/register/validate?token={}&email={}"
 URL_RESET_PASSWORD_VALIDATION="http://127.0.0.1:8000/auth/password/reset/validate?token={}&email={}&exp={}"
+
+# CORS
+CORS_ALLOW_ALL_ORIGINS = True

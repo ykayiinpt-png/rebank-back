@@ -37,7 +37,6 @@ ALLOWED_HOSTS = [
     "*"
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -174,8 +173,8 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
-SIGNING_KEY_PATH = os.environ.get('SIGNING_KEY_PATH', 'E:\\N\\ebank\\myenv\\jwt_private.key')
-VERIFYING_KEY_PATH = os.environ.get('VERIFYING_KEY_PATH', 'E:\\N\\ebank\\myenv\\jwt_public.key')
+SIGNING_KEY_PATH = os.environ.get('SIGNING_KEY_PATH', os.path.join(BASE_DIR, 'jwt_private.key'))
+VERIFYING_KEY_PATH = os.environ.get('VERIFYING_KEY_PATH', os.path.join(BASE_DIR, 'jwt_public.key'))
 
 
 SIMPLE_JWT = {

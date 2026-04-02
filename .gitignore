@@ -6,7 +6,9 @@ __pycache__/
 
 # Environments
 .env
+*.key
 .venv
+mvenv/
 env/
 venv/
 ENV/

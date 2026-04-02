@@ -1,11 +1,12 @@
 from rest_framework.generics import CreateAPIView
 from rest_framework.views import APIView
 from rest_framework import serializers as drf_serializers, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.translation import gettext as _t
 from django.core.exceptions import ValidationError
+from apps.core.models.auth import BaseUserSession
 from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.core.apis.serializers.login import LoginOtpSerializer, LoginResponseSerializer, LoginSerializer, LoginTokensSerializer
@@ -130,6 +131,22 @@ class LoginOtpView(APIView):
                 return Response({"message": message}, status=status.HTTP_417_EXPECTATION_FAILED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(responses={200: inline_serializer(
+        name='LogoutResponse',
+        fields={'message': drf_serializers.CharField()}
+    )})
+    def post(self, request, *args, **kwargs):
+        # Invalidate all active sessions for this user
+        BaseUserSession.objects.filter(
+            email=request.user.email, is_valid=True
+        ).update(is_valid=False)
+
+        return Response({"message": _t("Déconnexion réussie")})
 
 
 class ResetPasswordRequestView(APIView):

@@ -53,16 +53,19 @@ class AuthService:
             if existing_user.is_active:
                 raise ValidationError(_t("Ce compte existe déjà; veuillez vérifier votre email"))
             else:
-                # Check if we do have pass 1 hours since the first registration
-                if timezone.now() - existing_user.updated_at > timedelta(hours=1) :
+                if use_otp:
+                    # Mobile OTP flow: always resend OTP (OTP expires in 6 min)
                     existing_user.save()
-                    if use_otp:
-                        id_token, otp_exp = send_registration_otp(email, True)
-                    else:
-                        generate_registration_token(email, True)
+                    id_token, otp_exp = send_registration_otp(email, True)
                     verification_resent = True
                 else:
-                    check_email = True
+                    # Web flow: respect 1 hour cooldown for email links
+                    if timezone.now() - existing_user.updated_at > timedelta(hours=1):
+                        existing_user.save()
+                        generate_registration_token(email, True)
+                        verification_resent = True
+                    else:
+                        check_email = True
         else:
             user = UserModel.objects.create_user(email, password)
             if use_otp:
@@ -116,7 +119,7 @@ class AuthService:
         except UserModel.DoesNotExist:
             raise ValidationError(_t("Vos identifiants sont incorrects"))
     
-        if user.check_password(password + user.salt):
+        if not user.check_password(password + user.salt):
             raise ValidationError(_t("Vos identifiants sont incorrects"))
         
         
