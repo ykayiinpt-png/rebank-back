@@ -22,11 +22,11 @@ def send_template_email(subject, template, context, to):
         [to],
     )
 
+    email.attach_alternative(html_content, "text/html")
+
     try:
-        email.attach_alternative(html_content, "text/html")
         email.send()
-        
         logging.info(f"Mail template={template} Sent")
     except Exception as e:
-        logging.info(f"[Mail] Error occired {e}")
-        logging.error(e)
+        logging.error(f"[Mail] Error sending template={template}: {e}")
+        raise

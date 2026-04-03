@@ -273,14 +273,19 @@ def reset_password(request: HttpRequest):
             
             existing_user = UserModel.objects.filter(email=form.cleaned_data['email']).first()
             if (existing_user is not None) and (existing_user.is_active == True):
-                generate_reset_password_token(existing_user.email, True)
-                
+                try:
+                    generate_reset_password_token(existing_user.email, True)
+                except Exception as e:
+                    logger.error(f"Failed to send reset password email: {e}")
+                    messages.error(request, _t("Erreur lors de l'envoi du mail. Veuillez réessayer."), extra_tags="danger")
+                    return render(request, 'client/auth/reset_password.html', {'form': form})
+
                 # Set a reset password flag.
                 # Just to allow the user to see a page
                 request.session['r_password'] = True
-                
+
                 messages.success(request, _t('Un mail a été envoyé pour validation'))
-                
+
                 return redirect('client-auth-reset-password-check')
             else:
                 messages.error(request, _t("Veuillez fournir un email valide"), extra_tags="danger")
