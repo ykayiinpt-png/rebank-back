@@ -12,7 +12,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import secrets
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def read_key_file(filename):
     if os.path.isfile(filename):
@@ -28,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h&00a512d%z8h64mdz0w&6x66$(a%4h=wm+29ob!--2$3qx@co'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-h&00a512d%z8h64mdz0w&6x66$(a%4h=wm+29ob!--2$3qx@co')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -72,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.core.middleware.hmac_signing.HmacSignatureMiddleware',
 ]
 
 ROOT_URLCONF = 'ebank.urls'
@@ -173,7 +178,18 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/minute',
+        'user': '100/minute',
+        'login': '5/minute',
+        'otp': '5/minute',
+        'register': '3/hour',
+    },
 }
 
 SIGNING_KEY_PATH = os.environ.get('SIGNING_KEY_PATH', os.path.join(BASE_DIR, 'jwt_private.key'))
@@ -288,25 +304,34 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # Won't be used, will use custom logic instead
 #LOGIN_REDIRECT_URL=
 
-# Email Configuration
-#EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_HOST = "127.0.0.1"
-EMAIL_PORT = 1025 
-EMAIL_USE_TLS = False
-EMAIL_HOST_USER = ""
-EMAIL_HOST_PASSWORD = ""
-DEFAULT_FROM_EMAIL = "no-reply@rebank.com"
+# Email Configuration — Gmail SMTP (use App Password)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'rebank.noreply@gmail.com')
 
-# Hashing
-HMAC_SECRET = "abcd"
+# Hashing — HMAC secret for OTP token signing
+HMAC_SECRET = os.environ.get('HMAC_SECRET', secrets.token_hex(32))
 
-# Auth
-SESSION_SAVE_EVERY_REQUEST = True 
-SESSION_COOKIE_AGE = 1800 # 30 minutes in seconds
+# HMAC secret for API request signing (mobile ↔ backend)
+HMAC_API_SECRET = os.environ.get('HMAC_API_SECRET', secrets.token_hex(32))
 
-RESET_PASSWORD_EXP_MINUTES=5
-LOGIN_SESSION_EXPIRE_MINUTES=30
+# Auth — Session security
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_AGE = 1800  # 30 minutes
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = not DEBUG  # True in production (HTTPS)
+
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = not DEBUG
+
+RESET_PASSWORD_EXP_MINUTES = 5
+LOGIN_SESSION_EXPIRE_MINUTES = 30
 
 # OTP
 OTP_LENGTH = 6
@@ -316,5 +341,26 @@ OTP_EXP_DURATION_MINUTES = 6
 URL_REGISTATION_VALIDATION="http://127.0.0.1:8000/auth/register/validate?token={}&email={}"
 URL_RESET_PASSWORD_VALIDATION="http://127.0.0.1:8000/auth/password/reset/validate?token={}&email={}&exp={}"
 
-# CORS
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS — Whitelist (no more ALLOW_ALL_ORIGINS)
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8081',   # Expo dev
+    'http://localhost:19006',  # Expo web
+    'http://127.0.0.1:8000',  # Django itself
+]
+CORS_ALLOW_HEADERS = [
+    'accept', 'accept-encoding', 'authorization',
+    'content-type', 'origin', 'user-agent',
+    'x-timestamp', 'x-signature',  # HMAC headers
+]
+
+# Security headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+# HSTS — enable in production with HTTPS
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
