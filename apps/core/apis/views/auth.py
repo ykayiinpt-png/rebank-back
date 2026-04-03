@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.translation import gettext as _t
 from django.core.exceptions import ValidationError
 from apps.core.models.auth import BaseUserSession
+from apps.core.throttles import LoginRateThrottle, OtpRateThrottle, RegisterRateThrottle
 from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.core.apis.serializers.login import LoginOtpSerializer, LoginResponseSerializer, LoginSerializer, LoginTokensSerializer
@@ -22,6 +23,7 @@ from apps.core.services.auth import AuthService
 class RegisterView(CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = (AllowAny,)
+    throttle_classes = [RegisterRateThrottle]
 
     @extend_schema(request=RegisterSerializer, responses={201: RegisterResponseSerializer})
     def create(self, request, *args, **kwargs):
@@ -56,6 +58,7 @@ class RegisterView(CreateAPIView):
 
 class RegisterOtpView(APIView):
     permission_classes = (AllowAny,)
+    throttle_classes = [OtpRateThrottle]
 
     @extend_schema(request=RegisterOtpSerializer, responses={200: inline_serializer(
         name='RegisterOtpResponse',
@@ -86,7 +89,9 @@ class RegisterOtpView(APIView):
         
 
 class LoginView(APIView):
-    
+    permission_classes = (AllowAny,)
+    throttle_classes = [LoginRateThrottle]
+
     @extend_schema(request=LoginSerializer, responses={200: LoginResponseSerializer})
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
@@ -104,7 +109,9 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class LoginOtpView(APIView):
-    
+    permission_classes = (AllowAny,)
+    throttle_classes = [OtpRateThrottle]
+
     @extend_schema(request=LoginOtpSerializer, responses={
         200: LoginTokensSerializer
     })
@@ -151,6 +158,7 @@ class LogoutView(APIView):
 
 class ResetPasswordRequestView(APIView):
     permission_classes = (AllowAny,)
+    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(request=ResetPasswordRequestSerializer, responses={200: ResetPasswordRequestResponseSerializer})
     def post(self, request, *args, **kwargs):
@@ -176,6 +184,7 @@ class ResetPasswordRequestView(APIView):
 
 class ResetPasswordOtpView(APIView):
     permission_classes = (AllowAny,)
+    throttle_classes = [OtpRateThrottle]
 
     @extend_schema(request=ResetPasswordOtpSerializer, responses={200: ResetPasswordOtpResponseSerializer})
     def post(self, request, *args, **kwargs):
