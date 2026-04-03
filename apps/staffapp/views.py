@@ -39,25 +39,26 @@ def login(request: HttpRequest):
             # Authenticate user
             user = authenticate(request, email=email, password=password)
             if user is not None:
-                # We make sure that we do not have a valid user session
-                existing_login_session = BaseUserSession.objects.filter(
+                # Invalidate any existing sessions
+                BaseUserSession.objects.filter(
                     email=user.email, is_valid=True
-                ).order_by('-created_at').first()
-                
-                # A valid and non expired login session
-                if (existing_login_session is not None) and (not timestamp_has_expired(expiry_datetime=existing_login_session.exp)):
-                    # A session exists and has not logged out yet
-                    messages.error(
-                        request,
-                        _t("Une session d'utilisateur existe déjà. Veuillez vous déconnecter"),
-                        extra_tags='danger'
-                    )
-                else:
-                    # Generate otp and send by email
+                ).update(is_valid=False)
+
+                if user.two_factor_enabled:
+                    # Generate OTP and send by email
                     id_token, otp_exp = send_login_otp(email, True)
                     request.session['otp'] = { 'id_token': id_token, 'exp': otp_exp, 'email': email }
-                    # Redirect user to the otp page to enter otp
                     return redirect('staff-auth-login-otp')
+                else:
+                    # 2FA disabled — login directly
+                    BaseUserSession.objects.create(
+                        email=user.email,
+                        exp=timezone.now() + timedelta(minutes=settings.LOGIN_SESSION_EXPIRE_MINUTES)
+                    )
+                    request.session.set_expiry(timedelta(minutes=settings.LOGIN_SESSION_EXPIRE_MINUTES))
+                    app_login(request, user)
+                    messages.success(request, _t("Vous êtes connecté."))
+                    return redirect('staff-dashboard')
             else:
                 # Invalid credentials
                 messages.error(request, _t("Vos identifiants sont incorrects"), extra_tags='danger')
@@ -252,8 +253,22 @@ def list_transactions(request: HttpRequest):
             "transactions": transactions
         }
     )
-    
-    
+
+
+@app_login_staff_required()
+@require_GET
+def detail_transaction(request: HttpRequest, pk: int):
+    transaction = BankTransaction.objects.filter(pk=pk).first()
+    if transaction is None:
+        messages.error(request, _t("Transaction introuvable"), extra_tags="danger")
+        return redirect('staff-transactions-list')
+
+    return render(
+        request,
+        'staff/account/transaction_detail.html',
+        {'transaction': transaction}
+    )
+
 
 @app_login_staff_required()
 @require_http_methods(["GET", "POST"])

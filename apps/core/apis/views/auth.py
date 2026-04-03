@@ -97,15 +97,32 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                id_token, otp_exp = AuthService.login_user(serializer.validated_data['email'], serializer.validated_data['password'])
-                
-                return Response({ "id_token": id_token, "otp_exp": otp_exp })
+                user, id_token, otp_exp = AuthService.login_user(
+                    serializer.validated_data['email'],
+                    serializer.validated_data['password']
+                )
+
+                if user is not None:
+                    # 2FA disabled — return tokens directly
+                    refresh = RefreshToken.for_user(user)
+                    return Response({
+                        "refresh_token": str(refresh),
+                        "access_token": str(refresh.access_token),
+                        "two_factor_required": False,
+                    })
+                else:
+                    # 2FA enabled — OTP sent, client must call /login/otp
+                    return Response({
+                        "id_token": id_token,
+                        "otp_exp": otp_exp,
+                        "two_factor_required": True,
+                    })
             except Exception as e:
                 message = str(e)
                 if isinstance(e, ValidationError):
                     message = e.message
                 return Response({"message": message}, status=status.HTTP_417_EXPECTATION_FAILED)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class LoginOtpView(APIView):
@@ -140,6 +157,29 @@ class LoginOtpView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserProfileView(APIView):
+    """Return basic profile info including 2FA status."""
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(responses={200: inline_serializer(
+        name='UserProfileResponse',
+        fields={
+            'email': drf_serializers.EmailField(),
+            'first_name': drf_serializers.CharField(),
+            'last_name': drf_serializers.CharField(),
+            'two_factor_enabled': drf_serializers.BooleanField(),
+        }
+    )})
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        return Response({
+            "email": user.email,
+            "first_name": user.first_name or "",
+            "last_name": user.last_name or "",
+            "two_factor_enabled": user.two_factor_enabled,
+        })
+
+
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -154,6 +194,38 @@ class LogoutView(APIView):
         ).update(is_valid=False)
 
         return Response({"message": _t("Déconnexion réussie")})
+
+
+class TwoFactorToggleView(APIView):
+    """Enable or disable 2FA for the authenticated user."""
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        request=inline_serializer(
+            name='TwoFactorToggleRequest',
+            fields={'enabled': drf_serializers.BooleanField()}
+        ),
+        responses={200: inline_serializer(
+            name='TwoFactorToggleResponse',
+            fields={
+                'message': drf_serializers.CharField(),
+                'two_factor_enabled': drf_serializers.BooleanField(),
+            }
+        )}
+    )
+    def post(self, request, *args, **kwargs):
+        enabled = request.data.get('enabled')
+        if enabled is None:
+            return Response({"message": "Le champ 'enabled' est requis"}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.two_factor_enabled = bool(enabled)
+        request.user.save(update_fields=['two_factor_enabled'])
+
+        state = "activée" if request.user.two_factor_enabled else "désactivée"
+        return Response({
+            "message": f"Authentification à deux facteurs {state}",
+            "two_factor_enabled": request.user.two_factor_enabled,
+        })
 
 
 class ResetPasswordRequestView(APIView):

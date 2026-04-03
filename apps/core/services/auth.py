@@ -104,34 +104,40 @@ class AuthService:
     @staticmethod
     def login_user(email: str, password: str):
         """
-        Check user existance and password then send otp
-        for 2FA
-        
-        :returns 
-        id_token, otp_exp
+        Check user existence and password, then either:
+        - send OTP for 2FA (if user has two_factor_enabled=True)
+        - return the user directly (if 2FA is disabled)
+
+        :returns (user_or_None, id_token_or_None, otp_exp_or_None)
         """
-        
+
         user = None
-        
+
         # Authenticate user
         try:
             user = UserModel.objects.get(email=email)
         except UserModel.DoesNotExist:
             raise ValidationError(_t("Vos identifiants sont incorrects"))
-    
+
         if not user.check_password(password + user.salt):
             raise ValidationError(_t("Vos identifiants sont incorrects"))
-        
-        
+
         # Invalidate any existing sessions before creating a new one
         BaseUserSession.objects.filter(
             email=user.email, is_valid=True
         ).update(is_valid=False)
 
-        # Generate otp and send by email
-        id_token, otp_exp = send_login_otp(email, True)
-        
-        return id_token, otp_exp
+        if user.two_factor_enabled:
+            # Generate OTP and send by email
+            id_token, otp_exp = send_login_otp(email, True)
+            return None, id_token, otp_exp
+        else:
+            # No 2FA — create session and return user directly
+            BaseUserSession.objects.create(
+                email=email,
+                exp=timezone.now() + timedelta(minutes=settings.LOGIN_SESSION_EXPIRE_MINUTES)
+            )
+            return user, None, None
         
     @staticmethod
     def login_user_otp(id_token: str, otp: str, exp: float, email: str):

@@ -22,6 +22,9 @@ class BaseUser(AbstractUser, PermissionsMixin, TimeStampedModel, SoftDeletedMode
     last_name = models.CharField(max_length=30, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
 
+    # 2FA — user must opt-in before OTP is enforced on login
+    two_factor_enabled = models.BooleanField(default=False)
+
     # Track when the profile was last updated
     profile_updated_at = models.DateTimeField(auto_now=True)
 

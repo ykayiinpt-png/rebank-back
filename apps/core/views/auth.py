@@ -135,11 +135,21 @@ def login(request: HttpRequest):
                     email=user.email, is_valid=True
                 ).update(is_valid=False)
 
-                # Generate otp and send by email
-                id_token, otp_exp = send_login_otp(email, True)
-                request.session['otp'] = { 'id_token': id_token, 'exp': otp_exp, 'email': email }
-                # Redirect user to the otp page to enter otp
-                return redirect('client-auth-login-otp')
+                if user.two_factor_enabled:
+                    # Generate OTP and send by email
+                    id_token, otp_exp = send_login_otp(email, True)
+                    request.session['otp'] = { 'id_token': id_token, 'exp': otp_exp, 'email': email }
+                    return redirect('client-auth-login-otp')
+                else:
+                    # 2FA disabled — login directly
+                    BaseUserSession.objects.create(
+                        email=user.email,
+                        exp=timezone.now() + timedelta(minutes=settings.LOGIN_SESSION_EXPIRE_MINUTES)
+                    )
+                    request.session.set_expiry(timedelta(minutes=settings.LOGIN_SESSION_EXPIRE_MINUTES))
+                    app_login(request, user, settings.AUTHENTICATION_BACKENDS[0])
+                    messages.success(request, _t("Vous êtes connecté."))
+                    return redirect('client-account-dashboard')
             else:
                 # Invalid credentials
                 messages.error(request, _t("Vos identifiants sont incorrects"), extra_tags='danger')
