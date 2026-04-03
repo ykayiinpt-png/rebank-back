@@ -1,10 +1,10 @@
-import random
+import secrets
 import string
 
 from django.conf import settings
 
 def otp_generate():
     """
-    Generates a random 6-digit string for OTP
+    Generates a cryptographically secure random OTP
     """
-    return ''.join(random.choice(string.digits) for _ in range(settings.OTP_LENGTH))
+    return ''.join(secrets.choice(string.digits) for _ in range(settings.OTP_LENGTH))
