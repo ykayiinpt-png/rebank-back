@@ -1,24 +1,17 @@
 {% extends "layouts/auth.html" %}
-{%load crispy_forms_tags%}
-
+{% load crispy_forms_tags %}
 
 {% block body %}
-<div class="row mb-3 text-center fs-3 fw-bold">
-    <p>Création de compte</p>
-</div>
+<h2>Créer un compte</h2>
+<p class="rb-subtitle">Rejoignez ReBank en quelques étapes</p>
 
-<div class="row mb-3">
-    <form method="post">
-    {% csrf_token %}
-    {{ form | crispy }}
-
-    <button class="btn btn-md btn-success w-100" >S'inscrire</button>
+<form method="post">
+  {% csrf_token %}
+  {{ form | crispy }}
+  <button type="submit" class="btn btn-primary w-100 mt-3">S'inscrire</button>
 </form>
+
+<div class="text-center mt-3">
+  <p>Vous avez déjà un compte ? <a href="/auth/login">Se connecter</a></p>
 </div>
-
-<div class="row text-end">
-    <p>Vous avez déjà un compte ? <a href="/auth/login">Se Connecter</a></p>
-</div>
-
-
-{% endblock  %}
+{% endblock %}

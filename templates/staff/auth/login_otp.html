@@ -1,20 +1,13 @@
 {% extends "layouts/auth_staff.html" %}
-{%load crispy_forms_tags%}
-
+{% load crispy_forms_tags %}
 
 {% block body %}
-<div class="row mb-3 text-center fs-3 fw-bold">
-    <p>Staff - Se Connecter | OTP</p>
-</div>
+<h2>Vérification OTP</h2>
+<p class="rb-subtitle">Un code a été envoyé à votre email</p>
 
-<div class="row mb-3">
-    <form method="post">
-    {% csrf_token %}
-    {{ form | crispy }}
-
-    <button class="btn btn-md btn-primary w-100" >Valider</button>
+<form method="post">
+  {% csrf_token %}
+  {{ form | crispy }}
+  <button type="submit" class="btn btn-primary w-100 mt-3">Valider</button>
 </form>
-</div>
-
-
-{% endblock  %}
+{% endblock %}

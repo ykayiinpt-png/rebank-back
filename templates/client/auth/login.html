@@ -1,24 +1,18 @@
 {% extends "layouts/auth.html" %}
-{%load crispy_forms_tags%}
-
+{% load crispy_forms_tags %}
 
 {% block body %}
-<div class="row mb-3 text-center fs-3 fw-bold">
-    <p>Se Connecter</p>
-</div>
+<h2>Connexion</h2>
+<p class="rb-subtitle">Connectez-vous à votre espace client</p>
 
-<div class="row mb-3">
-    <form method="post">
-    {% csrf_token %}
-    {{ form | crispy }}
-
-    <button class="btn btn-md btn-success w-100" >Connexion</button>
+<form method="post">
+  {% csrf_token %}
+  {{ form | crispy }}
+  <button type="submit" class="btn btn-primary w-100 mt-3">Connexion</button>
 </form>
+
+<div class="text-center mt-3">
+  <p class="mb-1"><a href="/auth/reset-password">Mot de passe oublié ?</a></p>
+  <p>Vous n'avez pas de compte ? <a href="/auth/register">Créer un compte</a></p>
 </div>
-
-<div class="row text-end">
-    <p>Vous n'avez pas de compte ? <a href="/auth/register">Créer un compte</a></p>
-</div>
-
-
-{% endblock  %}
+{% endblock %}
