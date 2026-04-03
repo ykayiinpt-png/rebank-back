@@ -174,14 +174,13 @@ def logout(request: HttpRequest):
 @require_GET
 def dashboard(request: HttpRequest):
     """
-    Tableau de board
+    Tableau de bord staff
     """
-    
     context = {
-        'account': 0,
-        'transactions_count': 0
+        'pending_accounts_count': BankAccount.objects.filter(approved=False).count(),
+        'total_accounts': BankAccount.objects.count(),
+        'total_transactions': BankTransaction.objects.count(),
     }
-    
     return render(request, 'staff/account/dashboard.html', context)
 
 
