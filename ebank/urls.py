@@ -24,7 +24,13 @@ urlpatterns = [
     path('', include('apps.core.urls')),
     path('', include('apps.bankapp.urls')),
     path('', include('apps.staffapp.urls')),
-    
+
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
+
+# Custom error handlers
+handler400 = 'ebank.views.handler400'
+handler403 = 'ebank.views.handler403'
+handler404 = 'ebank.views.handler404'
+handler500 = 'ebank.views.handler500'
