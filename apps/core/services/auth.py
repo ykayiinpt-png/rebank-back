@@ -59,8 +59,8 @@ class AuthService:
                     id_token, otp_exp = send_registration_otp(email, True)
                     verification_resent = True
                 else:
-                    # Web flow: resend verification email (5 min cooldown)
-                    if timezone.now() - existing_user.updated_at > timedelta(minutes=5):
+                    # Web flow: resend verification email (configurable cooldown)
+                    if timezone.now() - existing_user.updated_at > timedelta(minutes=settings.REGISTRATION_RESEND_COOLDOWN_MINUTES):
                         existing_user.save()
                         generate_registration_token(email, True)
                         verification_resent = True
