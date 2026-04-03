@@ -1,4 +1,7 @@
-Nous vous invitons à valider votre email.Copier le lien suivant et coller le dans un navigateur
+Bienvenue sur ReBank !
 
+Pour activer votre compte, copiez le lien suivant dans votre navigateur :
 
 {{ url }}
+
+Si vous n'avez pas créé de compte, ignorez cet email.

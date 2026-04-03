@@ -1,7 +1,5 @@
-OTP
+Votre code de connexion ReBank : {{ otp }}
 
-Veuillez trouver l'OTP pour la connexion à votre compte:
+Ce code expire dans quelques minutes.
 
-{{ otp }}
-
-Merci
+Si vous n'avez pas demandé ce code, ignorez cet email.
