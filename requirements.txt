@@ -6,9 +6,11 @@ crispy-bootstrap5
 cryptography
 dj-rest-auth
 Django>=5.1,<6.0
+django-cors-headers
 django-crispy-forms
 django-extensions
 django-filter
+django-ratelimit
 djangorestframework
 djangorestframework_simplejwt
 drf-spectacular
@@ -18,6 +20,7 @@ jsonschema-specifications
 pillow
 pycparser
 PyJWT
+python-dotenv
 PyYAML
 referencing
 rpds-py
