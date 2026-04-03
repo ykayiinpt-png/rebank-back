@@ -123,17 +123,11 @@ class AuthService:
             raise ValidationError(_t("Vos identifiants sont incorrects"))
         
         
-        # We make sure that we do not have a valid user session
-        existing_login_session = BaseUserSession.objects.filter(
+        # Invalidate any existing sessions before creating a new one
+        BaseUserSession.objects.filter(
             email=user.email, is_valid=True
-        ).order_by('-created_at').first()
-        
-        # A valid and non expired login session
-        if (existing_login_session is not None) and \
-            (not timestamp_has_expired(expiry_datetime=existing_login_session.exp)):
-            # A session exists and has not logged out yet
-            raise ValidationError(_t("Une session d'utilisateur existe déjà. Veuillez vous déconnecter"))
-        
+        ).update(is_valid=False)
+
         # Generate otp and send by email
         id_token, otp_exp = send_login_otp(email, True)
         

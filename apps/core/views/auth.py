@@ -10,6 +10,7 @@ from django.utils.translation import gettext as _t
 from django.utils import timezone
 from django.conf import settings
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django_ratelimit.decorators import ratelimit
 
 from apps.core.helpers.mail import send_template_email
 from apps.core.helpers.time import timestamp_has_expired
@@ -111,12 +112,17 @@ def register_to_validate_error(request: HttpRequest):
 # [END] Registration
 
 # [START] Login
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 @require_http_methods(['GET', 'POST'])
 def login(request: HttpRequest):
+    # Redirect already authenticated users
+    if request.user.is_authenticated:
+        return redirect('client-account-dashboard')
+
     form = None
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
-        
+
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
@@ -124,29 +130,20 @@ def login(request: HttpRequest):
             # Authenticate user
             user = authenticate(request, email=email, password=password)
             if user is not None:
-                # We make sure that we do not have a valid user session
-                existing_login_session = BaseUserSession.objects.filter(
+                # Invalidate any existing sessions (from web or mobile)
+                BaseUserSession.objects.filter(
                     email=user.email, is_valid=True
-                ).order_by('-created_at').first()
-                
-                # A valid and non expired login session
-                if (existing_login_session is not None) and (not timestamp_has_expired(expiry_datetime=existing_login_session.exp)):
-                    # A session exists and has not logged out yet
-                    messages.error(
-                        request,
-                        _t("Une session d'utilisateur existe déjà. Veuillez vous déconnecter"),
-                        extra_tags='danger'
-                    )
-                else:
-                    # Generate otp and send by email
-                    id_token, otp_exp = send_login_otp(email, True)
-                    request.session['otp'] = { 'id_token': id_token, 'exp': otp_exp, 'email': email }
-                    # Redirect user to the otp page to enter otp
-                    return redirect('client-auth-login-otp')
+                ).update(is_valid=False)
+
+                # Generate otp and send by email
+                id_token, otp_exp = send_login_otp(email, True)
+                request.session['otp'] = { 'id_token': id_token, 'exp': otp_exp, 'email': email }
+                # Redirect user to the otp page to enter otp
+                return redirect('client-auth-login-otp')
             else:
                 # Invalid credentials
                 messages.error(request, _t("Vos identifiants sont incorrects"), extra_tags='danger')
-    else:        
+    else:
         form = UserLoginForm()
     
     return render(
@@ -157,6 +154,7 @@ def login(request: HttpRequest):
         }
     )
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 @require_http_methods(['GET', 'POST'])
 def login_otp(request: HttpRequest):
     form = None
@@ -204,14 +202,14 @@ def login_otp(request: HttpRequest):
                         else:
                             logger.error("User received OTP but does not exists")
                             
-                            messages.error(_t("Veuillez réessayer"), extra_tags="danger")
+                            messages.error(request, _t("Veuillez réessayer"), extra_tags="danger")
                             
                             # The user will be reprompt the otp page
                 else:
-                    messages.error(_t("Votre session est expiré"), extra_tags="danger")
+                    messages.error(request, _t("Votre session est expirée"), extra_tags="danger")
             except Exception as e:
                 logger.error("User tried OTP: OTP Session is invalid")
-                messages.error(_t("Votre session est expirée"), extra_tags="danger")
+                messages.error(request, _t("Votre session est expirée"), extra_tags="danger")
                 
     else:
         # We have a get request
@@ -275,7 +273,7 @@ def reset_password(request: HttpRequest):
                 
                 return redirect('client-auth-reset-password-check')
             else:
-                messages.error(_t("Veuillez fourni un email valid"))
+                messages.error(request, _t("Veuillez fournir un email valide"), extra_tags="danger")
     else:
         form = UserRecoverPassword()
         
