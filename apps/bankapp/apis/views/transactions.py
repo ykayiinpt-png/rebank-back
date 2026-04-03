@@ -3,8 +3,8 @@ from django.core.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from drf_spectacular.utils import extend_schema
+from rest_framework import serializers as drf_serializers, status
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from apps.bankapp.apis.serializers.transaction import BankDepositSerializer, BankTransactionSerializer, BankTransferSerializer, BankWithdrawSerializer
 from apps.bankapp.models.transaction import BankTransaction
@@ -109,6 +109,43 @@ class BankTransferAPIView(APIView):
                 if isinstance(e, ValidationError):
                     message = e.message
                 return Response({"message": message}, status=status.HTTP_417_EXPECTATION_FAILED)
-            
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RecentContactsAPIView(APIView):
+    """Return deduplicated recent transfer recipients for the current user."""
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses={200: inline_serializer(
+        name='RecentContact',
+        fields={
+            'numero': drf_serializers.IntegerField(),
+            'first_name': drf_serializers.CharField(),
+            'last_name': drf_serializers.CharField(),
+        },
+        many=True,
+    )})
+    def get(self, request):
+        transfers = BankTransaction.objects.filter(
+            source_account__user=request.user,
+            transaction_type='TRANSFER',
+            status='COMPLETED',
+            destination_account__isnull=False,
+        ).select_related('destination_account').order_by('-created_at')[:50]
+
+        seen = set()
+        contacts = []
+        for tx in transfers:
+            dest = tx.destination_account
+            if dest.numero and dest.numero not in seen:
+                seen.add(dest.numero)
+                contacts.append({
+                    'numero': dest.numero,
+                    'first_name': dest.first_name,
+                    'last_name': dest.last_name,
+                })
+            if len(contacts) >= 10:
+                break
+
+        return Response(contacts)
