@@ -1,0 +1,88 @@
+{% extends "layouts/client.html" %}
+
+{% block page_tile %}
+Détail de la Transaction
+{% endblock %}
+
+{% block body %}
+<div class="card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">Référence : {{ transaction.reference }}</h5>
+    {% if transaction.status == "COMPLETED" %}
+      <span class="rb-badge rb-badge-success">Effectuée</span>
+    {% elif transaction.status == "PENDING" %}
+      <span class="rb-badge rb-badge-warning">En attente</span>
+    {% else %}
+      <span class="rb-badge rb-badge-danger">Échouée</span>
+    {% endif %}
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card p-3" style="background:var(--rb-bg-warm);">
+        <small class="text-muted">Type</small>
+        <div class="fw-bold">
+          {% if transaction.transaction_type == "DEPOSIT" %}
+            <span class="rb-badge rb-badge-success">Dépôt</span>
+          {% elif transaction.transaction_type == "TRANSFER" %}
+            <span class="rb-badge rb-badge-info">Virement</span>
+          {% else %}
+            <span class="rb-badge rb-badge-warning">Retrait</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3" style="background:var(--rb-bg-warm);">
+        <small class="text-muted">Montant</small>
+        <div class="fw-bold fs-4">{{ transaction.amount }} MAD</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3" style="background:var(--rb-bg-warm);">
+        <small class="text-muted">Date</small>
+        <div class="fw-bold">{{ transaction.created_at|date:"d/m/Y à H:i" }}</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3" style="background:var(--rb-bg-warm);">
+        <small class="text-muted">Solde après opération</small>
+        <div class="fw-bold">{{ transaction.balance_after }} MAD</div>
+      </div>
+    </div>
+
+    {% if transaction.source_account %}
+    <div class="col-md-6">
+      <div class="card p-3" style="background:var(--rb-bg-warm);">
+        <small class="text-muted">Compte source</small>
+        <div class="fw-bold">{{ transaction.source_account.first_name }} {{ transaction.source_account.last_name }}</div>
+        <small class="text-muted">N° {{ transaction.source_account.numero }}</small>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if transaction.destination_account %}
+    <div class="col-md-6">
+      <div class="card p-3" style="background:var(--rb-bg-warm);">
+        <small class="text-muted">Compte destination</small>
+        <div class="fw-bold">{{ transaction.destination_account.first_name }} {{ transaction.destination_account.last_name }}</div>
+        <small class="text-muted">N° {{ transaction.destination_account.numero }}</small>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if transaction.description %}
+    <div class="col-12">
+      <div class="card p-3" style="background:var(--rb-bg-warm);">
+        <small class="text-muted">Description</small>
+        <div>{{ transaction.description }}</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="mt-4">
+    <a href="{% url 'bankapp-account-list-transactions' %}" class="btn btn-outline-secondary">&larr; Retour aux transactions</a>
+  </div>
+</div>
+{% endblock %}

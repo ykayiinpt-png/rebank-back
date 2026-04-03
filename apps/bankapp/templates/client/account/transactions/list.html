@@ -20,7 +20,7 @@ Historique des Transactions
       </thead>
       <tbody>
         {% for transaction in transactions %}
-        <tr>
+        <tr style="cursor:pointer;" onclick="window.location='{% url 'bankapp-account-detail-transaction' transaction.pk %}'">
           <td>{{ transaction.created_at|date:"d/m/Y H:i" }}</td>
           <td>
             {% if transaction.transaction_type == "DEPOSIT" %}

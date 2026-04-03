@@ -1,12 +1,36 @@
+from django.db.models import Q
 from django.http import HttpRequest
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_GET, require_http_methods
 
 from apps.bankapp.forms.transaction import BankDepositForm, BankTransferForm, BankWithdrawForm
+from apps.bankapp.models.transaction import BankTransaction
 from apps.bankapp.services.transaction import TransactionService
 from apps.core.decorators.auth import app_login_required
 
+
+
+@require_GET
+@app_login_required()
+def detail_transaction(request: HttpRequest, pk: int):
+    transaction = BankTransaction.objects.filter(
+        pk=pk
+    ).filter(
+        Q(source_account__user=request.user) |
+        Q(destination_account__user=request.user) |
+        Q(user=request.user)
+    ).first()
+
+    if transaction is None:
+        messages.error(request, "Transaction introuvable", extra_tags="danger")
+        return redirect('bankapp-account-list-transactions')
+
+    return render(
+        request,
+        'client/account/transactions/detail.html',
+        {'transaction': transaction}
+    )
 
 
 @require_GET

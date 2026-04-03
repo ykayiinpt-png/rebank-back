@@ -1,7 +1,7 @@
 from django.urls import path
 
 from apps.bankapp.apis.views.account import BankAccountCreateView, BankAccountDetailView, BankAccountListView, BankAccountUpdateView
-from apps.bankapp.apis.views.transactions import BankDepositAPIView, BankTransactionListAPIView, BankTransferAPIView, BankWithdrawAPIView, RecentContactsAPIView
+from apps.bankapp.apis.views.transactions import BankDepositAPIView, BankTransactionDetailAPIView, BankTransactionListAPIView, BankTransferAPIView, BankWithdrawAPIView, RecentContactsAPIView
 
 urlpatterns = [
     path('api/accounts/', BankAccountCreateView.as_view(), name='bankap-api-account-create'),
@@ -13,5 +13,6 @@ urlpatterns = [
     path('api/transactions/withdraw', BankWithdrawAPIView.as_view()),
     path('api/transactions/transfer', BankTransferAPIView.as_view()),
     path('api/transactions/list', BankTransactionListAPIView.as_view()),
+    path('api/transactions/<int:pk>', BankTransactionDetailAPIView.as_view(), name='bankapp-api-transaction-detail'),
     path('api/contacts/recent', RecentContactsAPIView.as_view()),
 ]

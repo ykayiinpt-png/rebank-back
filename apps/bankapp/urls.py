@@ -16,4 +16,5 @@ urlpatterns = [
     path('account/transfer', transaction_views.transfer, name='bankapp-account-transfer'),
     
     path('account/transactions/list', transaction_views.list_transactions, name='bankapp-account-list-transactions'),
+    path('account/transactions/<int:pk>', transaction_views.detail_transaction, name='bankapp-account-detail-transaction'),
 ] + api_urls

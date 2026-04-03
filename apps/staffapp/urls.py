@@ -19,5 +19,6 @@ urlpatterns = [
     path('staff/accounts/validate/<int:pk>', views.validate_account, name='staff-account-validate'),
     path('staff/accounts/deposit/<int:pk>', views.deposit_account, name='staff-account-deposit')  ,
     
-    path('staff/transactions/list', views.list_transactions, name='staff-transactions-list'),   
+    path('staff/transactions/list', views.list_transactions, name='staff-transactions-list'),
+    path('staff/transactions/<int:pk>', views.detail_transaction, name='staff-transaction-detail'),
 ]

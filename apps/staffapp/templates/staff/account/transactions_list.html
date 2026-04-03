@@ -21,7 +21,7 @@ Toutes les Transactions
       </thead>
       <tbody>
         {% for transaction in transactions %}
-        <tr>
+        <tr style="cursor:pointer;" onclick="window.location='{% url 'staff-transaction-detail' transaction.pk %}'">
           <td>{{ transaction.created_at|date:"d/m/Y H:i" }}</td>
           <td>
             {% if transaction.transaction_type == "DEPOSIT" %}

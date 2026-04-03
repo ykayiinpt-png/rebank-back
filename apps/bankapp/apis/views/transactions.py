@@ -1,3 +1,4 @@
+from django.db import models
 from django.http import HttpRequest
 from django.core.exceptions import ValidationError
 from rest_framework.views import APIView
@@ -25,6 +26,32 @@ class BankTransactionListAPIView(APIView):
             if isinstance(e, ValidationError):
                 message = e.message
             return Response({"message": message}, status=status.HTTP_417_EXPECTATION_FAILED)
+
+class BankTransactionDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses={200: BankTransactionSerializer})
+    def get(self, request: HttpRequest, pk: int):
+        try:
+            transaction = BankTransaction.objects.filter(
+                pk=pk
+            ).filter(
+                models.Q(source_account__user=request.user) |
+                models.Q(destination_account__user=request.user) |
+                models.Q(user=request.user)
+            ).first()
+
+            if transaction is None:
+                return Response({"message": "Transaction introuvable"}, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = BankTransactionSerializer(transaction)
+            return Response(serializer.data)
+        except Exception as e:
+            message = str(e)
+            if isinstance(e, ValidationError):
+                message = e.message
+            return Response({"message": message}, status=status.HTTP_417_EXPECTATION_FAILED)
+
 
 class BankDepositAPIView(APIView):
     permission_classes = [IsAuthenticated]
