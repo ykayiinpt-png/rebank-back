@@ -1,170 +1,71 @@
 {% extends "layouts/staff.html" %}
 
-{% load static %}
-
-{% block css %}
-<link rel="stylesheet" href="{% static 'css/card.css' %}">
-{% endblock %}
-
 {% block page_tile %}
-Compte N° {{ account.numero }}
+Détail du Compte
 {% endblock %}
 
 {% block body %}
-
-<div class="row mb-3 justify-content-end">
-    <div class="col-md-12 d-flex justify-content-end">
-        <a href="/staff/accounts/list" class="btn btn-dark">Liste Compte Bancaire</a>
-    </div>
+<div class="d-flex justify-content-end mb-4">
+  <a href="/staff/accounts/list" class="btn btn-outline-primary">Retour à la liste</a>
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="p-4 shadow">
-            <h5>Information Personnelles</h5>
-            <div class="form-group mb-3">
-                <label class="form-label">Nom</label>
-                <input type="text" value="{{ account.last_name }}" class="form-control" readonly />
-            </div>
-            <div class="form-group mb-3">
-                <label class="form-label">Prénom(s)</label>
-                <input type="text" value="{{ account.first_name }}" class="form-control" readonly />
-            </div>
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h6 style="font-weight:700; margin-bottom:16px;">Informations personnelles</h6>
+      <div class="mb-3">
+        <span class="text-muted" style="font-size:0.85rem;">Nom</span>
+        <div style="font-weight:600;">{{ account.last_name }}</div>
+      </div>
+      <div class="mb-3">
+        <span class="text-muted" style="font-size:0.85rem;">Prénom(s)</span>
+        <div style="font-weight:600;">{{ account.first_name }}</div>
+      </div>
+      <div class="mb-3">
+        <span class="text-muted" style="font-size:0.85rem;">N° Compte</span>
+        <div style="font-weight:600;">{{ account.numero|default:"Non attribué" }}</div>
+      </div>
+      <div>
+        <span class="text-muted" style="font-size:0.85rem;">Statut</span>
+        <div>
+          {% if account.approved %}
+            <span class="rb-badge rb-badge-success">Validé</span>
+          {% else %}
+            <span class="rb-badge rb-badge-warning">En attente</span>
+          {% endif %}
         </div>
-
-        <div class="mt-5">
-            <h5 class="mb-4">Carte</h5>
-            <div class="credit-card bg-dark text-white p-4 d-flex flex-column justify-content-between">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h4>Carte Classique</h4>
-                    <i class="fab fa-cc-visa fa-2x"></i>
-                </div>
-                <div class="card-number my-3">
-                    {{ account.numero }}
-                </div>
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <div class="card-holder">{{ acc.first_name }} {{ acc.last_name }}</div>
-                        <div>Valid au: --</div>
-                    </div>
-                    <img src="https://www.svgrepo.com/show/362035/visa-3.svg" alt="Chip" width="40">
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-    <div class="col-md-4">
-        {% if account.approved %}
-        <div class="p-4 shadow">
-            <h5>Balance</h5>
-            <div class="text-end" style="font-size: 1.4em;">
-                Dhr(s) {{ account.balance }}
-            </div>
+  </div>
 
-            <div class="mt-5">
-                <h5>Faire une Transaction</h5>
-                <div class="text-end">
-                    <a href="/staff/accounts/deposit/{{ account.pk }}" class="btn btn-md btn-success">Dépôt</a>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-
-        {% if not account.approved %}
-        <div class="p-4 shadow">
-            <div class="">
-                <h5>Validation</h5>
-                <p> Valider le compre bancaire après avoir vérifié la pièce d'identité. </p>
-                <div class="text-end">
-                    <form action="/staff/accounts/validate/{{ account.pk }}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">Valider</button>
-                    </form>
-                </div>
-
-                {% if account.identity_file %}
-                <div class="form-group my-5">
-                    <p>Pièce d'identité courante</p>
-                    <img src="{{ account.identity_file.url }}" alt="{{ account.last_name }}" style="max-width: 400px;">
-                </div>
-                {% endif %}
-            </div>
-        </div>
-         {% endif %}
-
+  <div class="col-md-6">
+    {% if account.approved %}
+    <div class="card p-4 mb-4">
+      <h6 style="font-weight:700; margin-bottom:16px;">Solde</h6>
+      <div class="rb-stat-value">{{ account.balance }} Dhr</div>
+      <div class="mt-3">
+        <a href="/staff/accounts/deposit/{{ account.pk }}" class="btn btn-primary">Effectuer un dépôt</a>
+      </div>
     </div>
+    {% endif %}
 
-    <div class="col-md-4">
-        {% if account.approved %}
-        <h5>Liste Transactions</h5>
-
-        <div class="mt-3">
-            {% for transaction in historic_transactions %}
-            <div class="mb-2">
-                <div class="d-flex align-items-center">
-                    {% if transaction.transaction_type == "DEPOSIT"%}
-                        <div class="rounded bg-success" style="width: 10px; height: 10px; margin-right: 10px;">
-                    {% elif transaction.transaction_type == "TRANSFER" and transaction.destination_account.pk == account.pk %}
-                        <div class="rounded bg-success" style="width: 10px; height: 10px; margin-right: 10px;">
-                    {% else %}
-                        <div class="rounded bg-danger" style="width: 10px; height: 10px; background-color: red; margin-right: 10px;">
-                    {% endif %}
-                    </div>
-                    <div class="d-flex">
-                        <div class="me-4">
-                            Dhr(s) <strong>
-                            
-                        {% if transaction.transaction_type == "DEPOSIT"%}
-                        +
-                        {% elif transaction.transaction_type == "TRANSFER" and transaction.destination_account.pk == account.pk %}
-                        +
-                         {% else %}
-                        -
-                        {% endif %}
-                            
-                        {{ transaction.amount }}</strong>
-                        </div>
-
-                        <div>
-                            {% if transaction.transaction_type == "DEPOSIT"%}
-                            <span class="badge rounded-pill bg-success">DEPÔT</span>
-                            {% elif transaction.transaction_type == "TRANSFER" and transaction.destination_account.pk == account.pk %}
-                            <span class="badge rounded-pill bg-primary">TRANSFERT ENTRANT</span>
-                            {% elif transaction.transaction_type == "TRANSFER" and transaction.source_account.pk == account.pk %}
-                            <span class="badge rounded-pill bg-warning">TRANSFERT SORTANT</span>
-                            {% else %}
-                                <span class="badge rounded-pill bg-warning text-black">RETRAIT</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between mt-2">
-                    <div style="max-width: 40%; text-wrap: wrap; color: gray; font-size: 0.8em;">
-                        
-                        <strong><small>
-                            {% if transaction.transaction_type == "DEPOSIT"%}
-                        {{ transaction.destination_account }}
-                        {% elif transaction.transaction_type == "TRANSFER" and transaction.destination_account.pk == account.pk %}
-                        {{ transaction.source_account }}
-                        {% elif transaction.transaction_type == "TRANSFER" and transaction.source_account.pk == account.pk %}
-                        {{ transaction.destination_account }}
-                         {% else %}
-                        {{ transaction.source_account }}
-                        {% endif %}
-                    </small></strong>
-                    </div>
-                    <div>
-                        <small>{{ transaction.created_at|date:"F j, Y, P" }}</small>
-                    </div>
-                </div>
-                <hr class="mt-2">
-            </div>
-            {% empty %}
-            <p class="mt-5">Pas de transaction</p>
-            {% endfor %}
-        </div>
-        {% endif %}
+    {% if not account.approved %}
+    <div class="card p-4 mb-4">
+      <h6 style="font-weight:700; margin-bottom:12px;">Validation</h6>
+      <p class="text-muted">Valider le compte bancaire après avoir vérifié la pièce d'identité.</p>
+      <form action="/staff/accounts/validate/{{ account.pk }}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Valider le compte</button>
+      </form>
     </div>
+    {% endif %}
+
+    {% if account.identity_file %}
+    <div class="card p-4">
+      <h6 style="font-weight:700; margin-bottom:12px;">Pièce d'identité</h6>
+      <img src="{{ account.identity_file.url }}" alt="{{ account.last_name }}" style="max-width:100%; border-radius:var(--radius);">
+    </div>
+    {% endif %}
+  </div>
 </div>
-
 {% endblock %}

@@ -1,78 +1,64 @@
 {% extends "layouts/staff.html" %}
 
-{% load static %}
-
-{% block css %}
-<link rel="stylesheet" href="{% static 'css/card.css' %}">
-{% endblock %}
-
 {% block page_tile %}
-Liste des transactions
+Toutes les Transactions
 {% endblock %}
 
 {% block body %}
-
-<div class="row mb-3 justify-content-end">
-    <div class="col-md-12 d-flex justify-content-end">
-        <a href="/staff/accounts/list" class="btn btn-dark">Liste Compte Bancaire</a>
-    </div>
-</div>
-
-<div class="row mb-3">
-    <div class="p-4 shadow">
-        <table class="table" style="font-size: 0.9rem;">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Montant (Dhr)</th>
-                    <th scope="col">Balance (Dhr)</th>
-                    <th scope="col">Type Transaction</th>
-                    <th scope="col">Compte Source</th>
-                    <th scope="col">Compte Destination</th>
-                    <th scope="col">Date Transaction</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transaction in transactions %}
-                <tr>
-                    <th scope="row">1</th>
-                    <td class="text-end">{{ transaction.amount }}</td>
-                    <td class="text-end">{{ transaction.balance_after }}</td>
-                    <td>
-                        {% if transaction.transaction_type == "DEPOSIT"%}
-                        <span class="badge rounded-pill bg-success">DEPÔT</span>
-                        {% elif transaction.transaction_type == "TRANSFER" %}
-                        <span class="badge rounded-pill bg-primary">TRANSFERT</span>
-                        {% else %}
-                            <span class="badge rounded-pill bg-warning text-black">RETRAIT</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if transaction.source_account %}
-                        {{ transaction.source_account }}
-                        {% else %}
-                        #
-                        {% endif %}
-                        
-                    </td>
-                    <td>
-                        {% if transaction.destination_account %}
-                        {{ transaction.destination_account }}
-                        {% else %}
-                        #
-                        {% endif %}
-                    </td>
-                    <td>
-                        {{ transaction.created_at|date:"F j, Y, P" }}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7">Pas de transaction(s)</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="card p-4">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th class="text-end">Montant (Dhr)</th>
+          <th class="text-end">Balance après (Dhr)</th>
+          <th>Compte source</th>
+          <th>Compte destination</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transaction in transactions %}
+        <tr>
+          <td>{{ transaction.created_at|date:"d/m/Y H:i" }}</td>
+          <td>
+            {% if transaction.transaction_type == "DEPOSIT" %}
+              <span class="rb-badge rb-badge-success">Dépôt</span>
+            {% elif transaction.transaction_type == "TRANSFER" %}
+              <span class="rb-badge rb-badge-info">Virement</span>
+            {% else %}
+              <span class="rb-badge rb-badge-warning">Retrait</span>
+            {% endif %}
+          </td>
+          <td class="text-end" style="font-weight:600;">{{ transaction.amount }}</td>
+          <td class="text-end">{{ transaction.balance_after }}</td>
+          <td>
+            {% if transaction.source_account %}
+              {{ transaction.source_account }}
+            {% else %}
+              --
+            {% endif %}
+          </td>
+          <td>
+            {% if transaction.destination_account %}
+              {{ transaction.destination_account }}
+            {% else %}
+              --
+            {% endif %}
+          </td>
+          <td>
+            <span class="rb-badge rb-badge-success">Effectuée</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted">Aucune transaction pour le moment.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

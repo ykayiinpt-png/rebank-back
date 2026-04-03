@@ -1,67 +1,62 @@
 {% extends "layouts/staff.html" %}
 
-{% load static %}
-
-{% block css %}
-<link rel="stylesheet" href="{% static 'css/card.css' %}">
-{% endblock %}
-
 {% block page_tile %}
-Comptes
+Gestion des Comptes
 {% endblock %}
 
 {% block body %}
-
-<div class="row mb-3">
-    <div class="bg-body rounded shadow-sm p-4">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Numéro</th>
-                    <th scope="col">Nom &amp; Prénom(s)</th>
-                    <th scope="col">Etat</th>
-                    <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for acc in accounts %}
-                <tr>
-                    <th scope="row">1</th>
-                    <td>
-                        {% if acc.numero != None %}
-                        <strong>{{ acc.numero }}</strong>
-                        {% else %}
-                        <span class="badge rounded-pill bg-warning text-dark">Non Attribué</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ acc.first_name }} {{ acc.last_name }}</td>
-                    <td>
-                        {% if acc.approved %}
-                        <span class="badge rounded-pill bg-success">Validé</span>
-                        {% else %}
-                        <span class="badge rounded-pill bg-info text-dark">En Approbation...</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ forloop.counter }}"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
-                                <li><a class="dropdown-item" href="/staff/accounts/detail/{{ acc.id }}">Voir Détail</a></li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <th scope="row" colspan="5">Pas de compte(s) bancaire(s)</th>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="card p-4">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>N° Compte</th>
+          <th class="text-end">Solde (Dhr)</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for acc in accounts %}
+        <tr>
+          <td>{{ acc.last_name }}</td>
+          <td>{{ acc.first_name }}</td>
+          <td>
+            {% if acc.numero != None %}
+              <strong>{{ acc.numero }}</strong>
+            {% else %}
+              <span class="rb-badge rb-badge-warning">Non attribué</span>
+            {% endif %}
+          </td>
+          <td class="text-end" style="font-weight:600;">{{ acc.balance }}</td>
+          <td>
+            {% if acc.approved %}
+              <span class="rb-badge rb-badge-success">Validé</span>
+            {% else %}
+              <span class="rb-badge rb-badge-warning">En attente</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-2">
+              <a href="/staff/accounts/detail/{{ acc.id }}" class="btn btn-outline-primary btn-sm">Voir</a>
+              {% if not acc.approved %}
+              <form action="/staff/accounts/validate/{{ acc.pk }}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm">Valider</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted">Aucun compte bancaire.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-
 {% endblock %}
