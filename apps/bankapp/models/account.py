@@ -1,13 +1,22 @@
+import os
+import uuid
 from django.db import models
 from django.conf import settings
 
 from apps.core.models.base import SoftDeletedModel, TimeStampedModel
 
+
+def identity_upload_path(instance, filename):
+    """Generate a UUID-based filename to prevent path traversal attacks."""
+    ext = os.path.splitext(filename)[1].lower()
+    return f'bank_account/identity/{uuid.uuid4().hex}{ext}'
+
+
 class BankAccount(TimeStampedModel, SoftDeletedModel):
-    first_name = models.CharField(null=False, blank=False)
-    last_name = models.CharField(null=False, blank=False)
-    
-    identity_file = models.FileField(null=False, upload_to='bank_account/identity') # TODO add upload to
+    first_name = models.CharField(null=False, blank=False, max_length=100)
+    last_name = models.CharField(null=False, blank=False, max_length=100)
+
+    identity_file = models.FileField(null=False, upload_to=identity_upload_path)
     
     approved = models.BooleanField(default=False, null=False)
     approved_at = models.DateTimeField(null=True)

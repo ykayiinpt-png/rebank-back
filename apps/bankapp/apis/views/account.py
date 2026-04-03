@@ -85,6 +85,7 @@ class BankAccountDetailView(APIView):
     
 
 class BankAccountUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = BankAccountSerializer
     
     @extend_schema(responses={200: {}})
