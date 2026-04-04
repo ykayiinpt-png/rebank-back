@@ -1,0 +1,320 @@
+/* ── ReBank Warm Theme ─────────────────────────── */
+:root {
+  --bg: #FDF8F4;
+  --bg-dark: #F5EDE4;
+  --surface: #FEFCFA;
+  --surface-hover: #F7F1EB;
+  --border: #E8E0D8;
+  --primary: #8B6F47;
+  --primary-dark: #6B5A3E;
+  --primary-light: #A68B5B;
+  --foreground: #2C2418;
+  --muted: #9C8E82;
+  --success: #5B8C5A;
+  --danger: #C9544D;
+  --warning: #D4A853;
+  --info: #4A6FA5;
+  --staff-accent: #4A6FA5;
+  --radius: 12px;
+  --radius-lg: 16px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--foreground);
+  margin: 0;
+}
+
+/* ── Override Bootstrap colors ────────────────── */
+.btn-primary {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  border-radius: var(--radius) !important;
+  font-weight: 600;
+  padding: 10px 24px;
+}
+.btn-primary:hover, .btn-primary:focus {
+  background: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+}
+.btn-outline-primary {
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  border-radius: var(--radius) !important;
+}
+.btn-outline-primary:hover {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+.btn-danger {
+  background: var(--danger) !important;
+  border-color: var(--danger) !important;
+  border-radius: var(--radius) !important;
+}
+.btn-success {
+  background: var(--success) !important;
+  border-color: var(--success) !important;
+  border-radius: var(--radius) !important;
+}
+
+a { color: var(--primary); }
+a:hover { color: var(--primary-dark); }
+
+/* ── Forms ────────────────────────────────────── */
+.form-control, .form-select {
+  border: 1.5px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  padding: 10px 14px;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(139,111,71,0.15) !important;
+}
+label, .form-label {
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+
+/* ── Cards ────────────────────────────────────── */
+.card, .rb-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 4px rgba(44,36,24,0.06);
+}
+.card-header {
+  background: var(--surface-hover) !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-weight: 700;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+}
+
+/* ── Alerts ───────────────────────────────────── */
+.alert {
+  border-radius: var(--radius) !important;
+  border: none !important;
+  font-weight: 500;
+}
+.alert-success {
+  background: rgba(91,140,90,0.12) !important;
+  color: #3d6b3c !important;
+}
+.alert-danger {
+  background: rgba(201,84,77,0.12) !important;
+  color: #9a3832 !important;
+}
+
+/* ── Tables ───────────────────────────────────── */
+.table {
+  border-radius: var(--radius) !important;
+  overflow: hidden;
+}
+.table thead th {
+  background: var(--surface-hover);
+  color: var(--foreground);
+  font-weight: 700;
+  border-bottom: 2px solid var(--border);
+  padding: 12px 16px;
+}
+.table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background: var(--surface) !important;
+}
+.table-striped > tbody > tr:nth-of-type(even) > * {
+  background: var(--bg) !important;
+}
+
+/* ── Auth layout ──────────────────────────────── */
+.rb-auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg) 0%, var(--bg-dark) 100%);
+  padding: 24px;
+}
+.rb-auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(44,36,24,0.08);
+  padding: 40px;
+  width: 100%;
+  max-width: 440px;
+}
+.rb-auth-card h2 {
+  font-weight: 800;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+.rb-auth-card .rb-subtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+.rb-auth-logo {
+  width: 56px;
+  height: 56px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+.rb-auth-logo svg {
+  width: 28px;
+  height: 28px;
+  fill: #fff;
+}
+
+/* ── Navbar — Client ──────────────────────────── */
+.rb-navbar {
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(44,36,24,0.04);
+  padding: 0 24px;
+}
+.rb-navbar .navbar-brand {
+  color: var(--primary) !important;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.5px;
+}
+.rb-navbar .nav-link {
+  color: var(--muted) !important;
+  font-weight: 600;
+  padding: 16px 14px !important;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+.rb-navbar .nav-link:hover,
+.rb-navbar .nav-link.active {
+  color: var(--primary) !important;
+  border-bottom-color: var(--primary);
+}
+
+/* ── Navbar — Staff ───────────────────────────── */
+.rb-navbar-staff {
+  background: var(--foreground) !important;
+  border-bottom: none;
+}
+.rb-navbar-staff .navbar-brand {
+  color: #fff !important;
+}
+.rb-navbar-staff .nav-link {
+  color: rgba(255,255,255,0.6) !important;
+  border-bottom-color: transparent;
+}
+.rb-navbar-staff .nav-link:hover,
+.rb-navbar-staff .nav-link.active {
+  color: #fff !important;
+  border-bottom-color: var(--staff-accent);
+}
+.rb-staff-badge {
+  background: var(--staff-accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Page content ─────────────────────────────── */
+.rb-content {
+  padding: 32px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.rb-page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+.rb-page-subtitle {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+/* ── Stat cards ───────────────────────────────── */
+.rb-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  text-align: center;
+}
+.rb-stat-card .rb-stat-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--foreground);
+}
+.rb-stat-card .rb-stat-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* ── Status badges ────────────────────────────── */
+.rb-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.rb-badge-success {
+  background: rgba(91,140,90,0.15);
+  color: var(--success);
+}
+.rb-badge-warning {
+  background: rgba(212,168,83,0.15);
+  color: #8a6d2a;
+}
+.rb-badge-danger {
+  background: rgba(201,84,77,0.15);
+  color: var(--danger);
+}
+.rb-badge-info {
+  background: rgba(74,111,165,0.15);
+  color: var(--info);
+}
+
+/* ── Utility ──────────────────────────────────── */
+.text-primary { color: var(--primary) !important; }
+.text-muted { color: var(--muted) !important; }
+.bg-surface { background: var(--surface) !important; }
+.border-warm { border-color: var(--border) !important; }
+
+/* ── Dropdown overrides ───────────────────────── */
+.dropdown-menu {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(44,36,24,0.1);
+}
+.dropdown-item:hover {
+  background: var(--surface-hover);
+}
+
+/* ── Footer security note ─────────────────────── */
+.rb-security-footer {
+  text-align: center;
+  padding: 16px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
